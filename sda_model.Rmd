@@ -2,7 +2,7 @@
 title: "The SDA Model v3.0"
 author: "Geraldine Bürgel"
 date: "30 Januar 2019"
-output: html_document
+output: github_document
 bibliography: sda_model_ref.bib
 ---
 
