@@ -137,7 +137,7 @@ $(document).ready(function () {
 <span class="math inline">\(A\)</span>: matrix of technological coefficients<br />
 <span class="math inline">\(Y\)</span>: final demand<br />
 <span class="math inline">\(L\)</span>: Leontief inverse or matrix of total input requirements</p>
-<p>We are working with FABIO <span class="citation">(Bruckner, M., Maus, V., Wieland, H., Giljum, S., Moran, D., Wood, R., Többen, J., Börner, J. 2018)</span>, a multi regional input-output (MRIO) database. The aim is to investigate sources of change in the land footprint of 191 countries and 130 different products worldwide. Therefore we introduce land use <span class="math inline">\(\hat{u}\)</span> (the hat indicates a diagonalised matrix) into the Leontief model to get land footprint <span class="math inline">\(F\)</span> as the outcome variable. Our basic model is</p>
+<p>We are working with FABIO <span class="citation">(Bruckner, M., Maus, V., Wieland, H., Giljum, S., Moran, D., Wood, R., Többen, J., Börner, J. 2018)</span>, a multi-regional input-output (MRIO) database. The aim is to investigate sources of change in the land footprint of 191 countries and 130 different products worldwide. Therefore we introduce land use <span class="math inline">\(\hat{u}\)</span> (the hat indicates a diagonalized matrix) into the Leontief model to get land footprint <span class="math inline">\(F\)</span> as the outcome variable. Our basic model is</p>
 <p><span class="math inline">\(F = \hat{u}LY\)</span></p>
 </div>
 <div id="decomposition-of-l" class="section level3">
@@ -152,7 +152,7 @@ $(document).ready(function () {
 <h3>Decomposition of Y</h3>
 <p>The final demand is being disassembled in a similar way, but with the addition of variables for GDP and population <span class="math inline">\(P\)</span>. We are going to individually examine</p>
 <p><span class="math inline">\(y^{lev} = \frac{y^s}{GDP}\)</span> displaying the level of final demand per capita,</p>
-<p><span class="math inline">\(y^{sup} = \frac{y^{rs}}{y^s}\)</span> showing the distribution of supplier contries of final demand,</p>
+<p><span class="math inline">\(y^{sup} = \frac{y^{rs}}{y^s}\)</span> showing the distribution of supplier countries of final demand,</p>
 <p><span class="math inline">\(y^{pro} = \frac{y^{rs}_i}{y^{rs}}\)</span> displaying the distribution of products in the final demand and</p>
 <p><span class="math inline">\(G = \frac{GDP}{P}\)</span> for GDP per capita.</p>
 <p>Finally we get <span class="math inline">\(Y = y^{pro} y^{sup} y^{lev} G P\)</span>.</p>
@@ -182,7 +182,7 @@ $(document).ready(function () {
 \Delta F  &amp; = (\Delta\hat{u})l^{pro}(0)l^{sup}(0)l^{lev}(0)y^{pro}(0)y^{sup}(0)y^{lev}(0)G(0)P(0)\\
 &amp; + \hat{u}(1)(\Delta l^{pro})l^{sup}(0)l^{lev}(0)y^{pro}(0)y^{sup}(0)y^{lev}(0)G(0)P(0)\\
 &amp; + \hat{u}(1)l^{pro}(1)(\Delta l^{sup})l^{lev}(0)y^{pro}(0)y^{sup}(0)y^{lev}(0)G(0)P(0)\\
-&amp; + \hat{u}(1)l^{pro}(1)l^{sup}(1)(\Delta l^{lev})y^{pro}(0)y^{sup}(0)y^{lev}(0)G01)P(0)\\
+&amp; + \hat{u}(1)l^{pro}(1)l^{sup}(1)(\Delta l^{lev})y^{pro}(0)y^{sup}(0)y^{lev}(0)G(1)P(0)\\
 &amp; + \hat{u}(1)l^{pro}(1)l^{sup}(1)l^{lev}(1)(\Delta y^{pro})y^{sup}(0)y^{lev}(0)G(0)P(0)\\
 &amp; + \hat{u}(1)l^{pro}(1)l^{sup}(1)l^{lev}(1)y^{pro}(1)(\Delta y^{sup})y^{lev}(0)G(0)P(0)\\
 &amp; + \hat{u}(1)l^{pro}(1)l^{sup}(1)l^{lev}(1)y^{pro}(1)y^{sup}(1)(\Delta y^{lev})G(0)P(0)\\

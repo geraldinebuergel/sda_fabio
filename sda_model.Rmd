@@ -2,7 +2,7 @@
 title: "The SDA Model v3.0"
 author: "Geraldine Bürgel"
 date: "30 Januar 2019"
-output: github_document
+output: html_document
 bibliography: sda_model_ref.bib
 ---
 
@@ -22,7 +22,7 @@ $A$: matrix of technological coefficients
 $Y$: final demand  
 $L$: Leontief inverse or matrix of total input requirements
 
-We are working with FABIO [@Bruckner.2018], a multi regional input-output (MRIO) database. The aim is to investigate sources of change in the land footprint of 191 countries and 130 different products worldwide. Therefore we introduce land use $\hat{u}$ (the hat indicates a diagonalised matrix) into the Leontief model to get land footprint $F$ as the outcome variable. Our basic model is  
+We are working with FABIO [@Bruckner.2018], a multi-regional input-output (MRIO) database. The aim is to investigate sources of change in the land footprint of 191 countries and 130 different products worldwide. Therefore we introduce land use $\hat{u}$ (the hat indicates a diagonalized matrix) into the Leontief model to get land footprint $F$ as the outcome variable. Our basic model is  
 
 $F = \hat{u}LY$  
 
@@ -44,7 +44,7 @@ The final demand is being disassembled in a similar way, but with the addition o
 
 $y^{lev} = \frac{y^s}{GDP}$ displaying the level of final demand per capita,  
 
-$y^{sup} = \frac{y^{rs}}{y^s}$ showing the distribution of supplier contries of final demand,  
+$y^{sup} = \frac{y^{rs}}{y^s}$ showing the distribution of supplier countries of final demand,  
 
 $y^{pro} = \frac{y^{rs}_i}{y^{rs}}$ displaying the distribution of products in the final demand and  
 
