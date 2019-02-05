@@ -24,31 +24,35 @@ u[is.nan(u)] <- 0
 -------------------------------
 # built Y variables
 -------------------------------
-  
-#select columns with final demand for food only
 
-df_YFood <- as.data.frame(Y) %>%
+#select columns with final demand for food only
+str(Y)
+Y_df_Food <- as.data.frame(Y) %>% 
   select(contains("Food"))
-YFood <- as.matrix(df_YFood)
+Y_Food <- as.matrix(Y_df_Food)
 
 #create column sums
-ys <- colSums(YFood)
+ys <- colSums(Y_Food)
 
-#distribution of supplier countries yrs/ys
-yrs <- 
+#distribution of supplier countries (yrs/ys)
+head(yrs)
+yrs <- aggregate(Y_Food, by = list(???), FUN = colSums) #try split?
 ysup <- yrs / ys
 
-#distribution of products yirs/yrs
-ypro <- YFood / yrs
+#distribution of products (yirs/yrs)
+ypro <- Y_Food / yrs
 
-#level of final demand per GDP ys/GDP
-ylev <- ys / gdp_data
+#implement world bank data including per capita function
+source("wb_data.R")
+
+#level of final demand per GDP (ys/GDP)
+ylev <- ys / 
 
 #GDP per capita
-G <- per_capita(gdp_data)
+G <- 
 
 #population
-P <- wb_pop_data$value
+P <- 
 
 -------------------------------
 # finished equation
