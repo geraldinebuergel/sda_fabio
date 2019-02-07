@@ -1,6 +1,6 @@
 library(tidyverse)
 memory.limit()
-memory.limit(8000)
+memory.limit(60000)
 
 rm(list = ls()); gc()
 
@@ -13,8 +13,10 @@ load("C:/Users/Zoe/Desktop/FABIO/1986_X.RData")
 load("C:/Users/Zoe/Desktop/FABIO/1986_L.RData")
 load("C:/Users/Zoe/Desktop/FABIO/1986_Y.RData")
 
-# built u in ha/1000t
-
+-------------------------------
+  # built U in ha/1000t
+-------------------------------
+  
 u <- E$Landuse / X
 u[is.nan(u)] <- 0
 U <- diag(u)
@@ -22,20 +24,32 @@ U <- diag(u)
 -------------------------------
 # built L variables
 -------------------------------
-
+  
 # level of total input requirements (Ljs)
 str(L)
 llev <- colSums(L)
 
 # distribution of supplier countries (Ljrs/Ljs)
-
+ljrs_list <- split.data.frame(as.data.frame(L), rep(1:192, each = 130))
+ljrs_list_sum <- lapply(ljrs_list, FUN = colSums)
+ljrs <- do.call(rbind, ljrs_list_sum)
+as.matrix(ljrs)
+lsup <- sweep(ljrs, 2, llev, FUN = '/')
+lsup[is.nan(lsup)] <- 0
 
 # distribution of intermediate products (Lijrs/Ljrs)
+lpro_list <- lapply(ljrs_list, function(x){ x / colSums(x) })
+lpro_df_list <- do.call(rbind, lpro_list)
+lpro <- as.matrix(as.data.frame(lapply(lpro_df_list, as.numeric)))
+lpro[is.nan(lpro)] <- 0
+
+L_1986 <- t(lpro %*% t(lsup)) %*% t(llev) #error: non-conformable arguments
+L_1986 <- lpro %*% t(lsup)
 
 -------------------------------
 # built Y variables
 -------------------------------
-
+  
 # select columns with final demand for food only
 str(Y)
 Y_df_Food <- as.data.frame(Y) %>% 
@@ -72,17 +86,17 @@ source("wb_data.R")
 
 # level of final demand per GDP (ys/GDP)
 ylev <- 
-
+  
 # GDP per capita
 G <- 
-
+  
 # population
 P <- 
-
+  
 -------------------------------
 # finished equation
 -------------------------------
-
-f <- U %*% L %*% ysup %*% ypro %*% ylev %*% G %*% P
+  
+f <- U %*% lsup %*% lpro %*% llev %*% ysup %*% ypro %*% ylev %*% G %*% P
 # * = elementwise multiplication
 # %*% = matrix multiplication
