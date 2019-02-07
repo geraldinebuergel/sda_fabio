@@ -5,7 +5,7 @@ memory.limit(8000)
 rm(list = ls()); gc()
 
 ###########################
-# Built F = ûLY
+# Built F = ULY
 ###########################
 
 load("C:/Users/Zoe/Desktop/FABIO/1986_E.RData")
@@ -22,6 +22,15 @@ U <- diag(u)
 -------------------------------
 # built L variables
 -------------------------------
+
+# level of total input requirements (Ljs)
+str(L)
+llev <- colSums(L)
+
+# distribution of supplier countries (Ljrs/Ljs)
+
+
+# distribution of intermediate products (Lijrs/Ljrs)
 
 -------------------------------
 # built Y variables
