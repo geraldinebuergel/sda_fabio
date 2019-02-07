@@ -23,6 +23,23 @@ U <- diag(u)
 # built L variables
 -------------------------------
 
+# level of total input requirements (Ljs)
+llev <- colSums(L)
+
+# distribution of supplier countries (Ljrs/Ljs)
+ljrs_list <- split.data.frame(as.data.frame(L), rep(1:192, each = 130))
+ljrs_list_sum <- lapply(ljrs_list, FUN = colSums)
+ljrs <- do.call(rbind, ljrs_list_sum)
+as.matrix(ljrs)
+lsup <- sweep(ljrs, 2, llev, FUN = '/')
+lsup[is.nan(lsup)] <- 0
+
+# distribution of intermediate products (Lijrs/Ljrs)
+lpro_list <- lapply(ljrs_list, function(x){ x / colSums(x) })
+lpro <- do.call(rbind, lpro_list)
+as.matrix(lpro)
+lpro[is.nan(lpro)] <- 0
+
 -------------------------------
 # built Y variables
 -------------------------------
