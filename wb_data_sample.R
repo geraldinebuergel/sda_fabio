@@ -2,9 +2,6 @@ library(wbstats)
 
 #rm(list = ls()); gc()
 
-# population data from 260 world bank regions
-wb_pop_data <- wb(indicator = "SP.POP.TOTL", startdate = 1986, enddate = 1986)
-
 # 192 fabio regions
 fabio_regions <- as.character(c("ARM","AFG","ALB","DZA","AGO","ATG","ARG","AUS",
                                 "AUT","BHS","BHR","BRB","BLX","BGD","BOL","BWA",
@@ -30,27 +27,24 @@ fabio_regions <- as.character(c("ARM","AFG","ALB","DZA","AGO","ATG","ARG","AUS",
                                 "ARE","UGA","SUN","GBR","UKR","USA","BFA","URY",
                                 "UZB","VEN","VNM","ETH","WSM","YUG","YEM","COD",
                                 "ZMB","BEL","LUX","SRB","MNE","SDN","SSD","ROW"))
+fabio_regions <- fabio_regions[1:10]
 
-# find 183 common regions
-com_pop_regions <- intersect(fabio_regions, wb_pop_data$iso3c)
-setdiff(fabio_regions, wb_pop_data$iso3c)
+# population data from world bank
+wb_pop <- wb(indicator = "SP.POP.TOTL", startdate = 2013, enddate = 2013) %>% 
+  subset(subset = iso3c %in% fabio_regions) %>% 
+  dplyr::select(value) %>% 
+  as.matrix()
 
-# 9 fabio regions do not match with world bank regions
-# fabio = WB equivalent
-# BLX = BEL+LUX
-# SCG = serbia+MNE
-# TWN = CHN+taiwan
-# SUN(until 1991) = RUS+EST+LTU+LVA+ARM+AZE+BLR+GEO+KAZ+KGZ+MDA+TKM+UKR+UZB
+# GDP data from world bank
+wb_gdp <- wb(indicator = "NY.GDP.MKTP.CD", startdate = 2013, enddate = 2013) %>% 
+  subset(subset = iso3c %in% fabio_regions) %>% 
+  dplyr::select(value) %>% 
+  as.matrix()
 
-# get GDP data from world bank for 197 regions
-wb_gdp_data <- wb(indicator = "NY.GDP.MKTP.CD", startdate = 1986, enddate = 1986)
-
-# only 143 common regions with fabio -> 49 regions do not match
-com_gdp_regions <- intersect(fabio_regions, wb_gdp_data$iso3c)
-setdiff(fabio_regions, wb_gdp_data$iso3c)
+# GDP per capita
+gdp_per_capita <- wb_gdp / wb_pop
 
 # implement per capita function
-source("per_capita.R")
+#source("per_capita.R")
 
-# get GDP per capita
-per_capita(wb_gdp_data)
+

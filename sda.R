@@ -8,17 +8,18 @@ memory.limit(8000)
 rm(list = ls()); gc()
 
 #------------------------------------
-# Built F = ULY
+# decompose F = ULY
 #------------------------------------
 
-load("C:/Users/Zoe/Desktop/FABIO/1986_E.RData")
-load("C:/Users/Zoe/Desktop/FABIO/1986_X.RData")
-load("C:/Users/Zoe/Desktop/FABIO/1986_L.RData")
-load("C:/Users/Zoe/Desktop/FABIO/1986_Y.RData")
+load("C:/Users/Zoe/Desktop/FABIO/2013_E.RData")
+load("C:/Users/Zoe/Desktop/FABIO/2013_X.RData")
+load("C:/Users/Zoe/Desktop/FABIO/2013_L.RData")
+load("C:/Users/Zoe/Desktop/FABIO/2013_Y.RData")
 
 #--------------------------------------------------
 # reduce data to sample size of 10 countries
 #--------------------------------------------------
+
 str(E)
 str(X)
 str(L)
@@ -37,7 +38,7 @@ u[is.nan(u)] <- 0
 U <- diag(u)
 
 #-------------------------------
-# built L variables
+# decompose L
 #-------------------------------
 
 # level of total input requirements (Ljs)
@@ -55,10 +56,11 @@ lsup[is.nan(lsup)] <- 0
 # distribution of intermediate products (Lijrs/Ljrs)
 lpro <- L %*% ginv(ljrs)
 
-L_1986 <- lpro %*% lsup %*% llev
+L_dec <- lpro %*% lsup %*% llev
+all.equal(L, L_dec)
 
 #-------------------------------
-# built Y variables
+# decompose Y
 #-------------------------------
   
 # select columns with final demand for food only
@@ -87,23 +89,26 @@ ysup <- yrs %*% t(ginv(ys))
 ypro <- Y_Food %*% ginv(yrs)
 
 # implement world bank data including per capita function
-source("wb_data.R")
+source("wb_data_sample.R")
 
 # level of final demand per GDP (ys/GDP)
-ylev <- ys %*% ginv(wb_gdp_data)
+ylev <- ys / wb_gdp
   
 # GDP per capita
-G <- 
+G <- gdp_per_capita
   
 # population
-P <- 
+P <- wb_pop
 
-Y_1986 <- ypro %*% ysup #%*% ylev %*% G %*% P
-    
+Y_dec <- ypro %*% ysup %*% t(ylev) %*% G %*% t(P)
+
+all.equal(Y_Food, Y_dec)
+
 #-------------------------------
 # finished land footprint
 #-------------------------------
-  
-F <- U %*% L_1986 #%*% Y_1986
+
+F <- U %*% L %*% Y_Food  
+F_dec <- U %*% L_dec %*% Y_dec
 # * = elementwise multiplication
 # %*% = matrix multiplication
