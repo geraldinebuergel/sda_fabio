@@ -2,7 +2,9 @@
 title: "The SDA Model v3.0"
 author: "Geraldine Bürgel"
 date: "30 Januar 2019"
-output: html_document
+output: 
+  github_document:
+        pandoc_args: --webtex
 bibliography: sda_model_ref.bib
 ---
 
@@ -30,29 +32,29 @@ $F = \hat{u}LY$
 
 Since the total input requirements are associated with technological change, we want to further unravel this variable for a more detailed analysis. In the following supplier countries are denoted by $r = 1,...,m$ with $i = 1,...,n$ intermediate products and producing countries are denoted by $s = 1,...,m$ with $j = 1,...,n$ final products. $L$ gets decomposed into  
 
-$l^{lev} = L^s_j = \sum_{r=1}^{m}\sum_{i=1}^{n}L^{rs}_{ij}$ representing the level of total input requirements,  
-
-$l^{sup} = \frac{L^{rs}_j}{L^s_j}$ representing the distribution of supplier countries of required inputs,   
-
 $l^{pro} = \frac{L^{rs}_{ij}}{L^{rs}_j}$ representing the distribution of products produced.  
 
-Consequently $L = l^{pro} l^{sup} l^{lev}$.
+$l^{sup} = \frac{L^{rs}_j}{L^s_j}$ representing the distribution of supplier countries of required inputs and   
+
+$l^{lev} = L^s_j = \sum_{r=1}^{m}\sum_{i=1}^{n}L^{rs}_{ij}$ representing the level of total input requirements.  
+
+Thus $L = l^{pro} l^{sup} l^{lev}$.
 
 ###Decomposition of Y
 
 The final demand is being disassembled in a similar way, but with the addition of variables for GDP and population $P$. We are going to individually examine    
 
-$y^{lev} = \frac{y^s}{GDP}$ displaying the level of final demand per capita,  
-
-$y^{sup} = \frac{y^{rs}}{y^s}$ showing the distribution of supplier countries of final demand,  
-
 $y^{pro} = \frac{y^{rs}_i}{y^{rs}}$ displaying the distribution of products in the final demand and  
+
+$y^{sup} = \frac{y^{rs}}{y^s}$ showing the distribution of supplier countries of final demand, 
+
+$y^{lev} = \frac{y^s}{GDP}$ displaying the level of final demand per capita and  
 
 $G = \frac{GDP}{P}$ for GDP per capita.  
 
 Finally we get $Y = y^{pro} y^{sup} y^{lev} G P$.
 
-As a result we get the extended model with  
+The result is a decomposed model with nine determinants:  
 
 $F = \hat{u}LY = \hat{u} l^{pro} l^{sup} l^{lev} y^{pro} y^{sup} y^{lev} G P$.
 
