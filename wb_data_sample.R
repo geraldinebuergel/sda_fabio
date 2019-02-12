@@ -45,6 +45,9 @@ wb_gdp <- wb(indicator = "NY.GDP.MKTP.CD", startdate = 2013, enddate = 2013) %>%
 gdp_per_capita <- wb_gdp / wb_pop
 
 # implement per capita function
-#source("per_capita.R")
+source("per_capita.R")
 
+gdp_per_capita_f <- per_capita(fabio_regions, wb_gdp, year = 2013) %>% 
+  dplyr::select(value) %>% 
+  as.matrix()
 

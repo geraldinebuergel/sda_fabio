@@ -1,114 +1,25 @@
 library(tidyverse)
-library(MASS)
-require(MASS)
-require(dplyr)
-memory.limit()
-memory.limit(8000)
 
 rm(list = ls()); gc()
 
-#------------------------------------
-# decompose F = ULY
-#------------------------------------
+source("data_sample.R")
 
-load("C:/Users/Zoe/Desktop/FABIO/2013_E.RData")
-load("C:/Users/Zoe/Desktop/FABIO/2013_X.RData")
-load("C:/Users/Zoe/Desktop/FABIO/2013_L.RData")
-load("C:/Users/Zoe/Desktop/FABIO/2013_Y.RData")
+#---------------------------------
+# SDA
+#---------------------------------
 
-#--------------------------------------------------
-# reduce data to sample size of 10 countries
-#--------------------------------------------------
+delta <- function(x_2012, x_2013){x_2013 - x_2012} # use diff?
 
-str(E)
-str(X)
-str(L)
-str(Y)
-E <- E[1:1300,]
-X <- X[1:1300]
-L <- L[1:1300, 1:1300]
-Y <- Y[1:1300, 1:40]
+SDA <- function(U(t-1), U(t), L(t-1), L(t), Y(t-1), Y(t)){
+  delta_U <- mean(delta(U) %*% L(t) %*% Y(t),   
+                  delta(U) %*% L(t-1) %*% Y(t-1))
+  delta_L <- mean(U(t-1) %*% delta(L) %*% Y(t),   
+                  U(t) %*% delta(L) %*% Y(t-1))
+  delta_Y <- mean(U(t-1) %*% L(t-1) %*% delta(Y),   
+                  U(t) %*% L(t) %*% delta(Y))
+  delta_F <- delta_U + delta_L + delta_Y
+}
 
-#-------------------------------
-# built U in ha/1000t
-#-------------------------------
-  
-u <- E$Landuse / X
-u[is.nan(u)] <- 0
-U <- diag(u)
-
-#-------------------------------
-# decompose L
-#-------------------------------
-
-# level of total input requirements (Ljs)
-str(L)
-llev <- colSums(L)
-
-# distribution of supplier countries (Ljrs/Ljs)
-ljrs_list <- split.data.frame(as.data.frame(L), rep(1:10, each = 130))
-ljrs_list_sum <- lapply(ljrs_list, FUN = colSums)
-ljrs <- do.call(rbind, ljrs_list_sum)
-as.matrix(ljrs)
-lsup <- ljrs %*% t(ginv(llev))
-lsup[is.nan(lsup)] <- 0
-
-# distribution of intermediate products (Lijrs/Ljrs)
-lpro <- L %*% ginv(ljrs)
-
-L_dec <- lpro %*% lsup %*% llev
-all.equal(L, L_dec)
-
-#-------------------------------
-# decompose Y
-#-------------------------------
-  
-# select columns with final demand for food only
-str(Y)
-Y_df_Food <- as.data.frame(Y) %>% 
-  dplyr::select(contains("Food"))
-Y_Food <- as.matrix(Y_df_Food)
-
-# create column sums
-ys <- colSums(Y_Food)
-
-# split Y into list of 10 data frames with 130 rows each
-yrs_list <- split.data.frame(Y_df_Food, rep(1:10, each = 130))
-
-# sum up columns of each data frame
-yrs_list_sum <- lapply(yrs_list, FUN = colSums)
-
-# merge list of column sums into matrix
-yrs <- do.call(rbind, yrs_list_sum) %>% 
-  as.matrix()
-
-# get distribution of supplier countries (yrs/ys)
-ysup <- yrs %*% t(ginv(ys))
-
-# get distribution of products (yirs/yrs)
-ypro <- Y_Food %*% ginv(yrs)
-
-# implement world bank data including per capita function
-source("wb_data_sample.R")
-
-# level of final demand per GDP (ys/GDP)
-ylev <- ys / wb_gdp
-  
-# GDP per capita
-G <- gdp_per_capita
-  
-# population
-P <- wb_pop
-
-Y_dec <- ypro %*% ysup %*% t(ylev) %*% G %*% t(P)
-
-all.equal(Y_Food, Y_dec)
-
-#-------------------------------
-# finished land footprint
-#-------------------------------
-
-F <- U %*% L %*% Y_Food  
-F_dec <- U %*% L_dec %*% Y_dec
-# * = elementwise multiplication
-# %*% = matrix multiplication
+# write a data prep function that returns each variable
+# write two polar SDA functions and take mean
+# loop/rep for 1986-2013
