@@ -2,9 +2,9 @@
 title: "The SDA Model v3.0"
 author: "Geraldine Bürgel"
 date: "30 Januar 2019"
-output: 
-  github_document:
-        pandoc_args: --webtex
+output: html_document
+#  github_document:
+#        pandoc_args: --webtex
 bibliography: sda_model_ref.bib
 ---
 

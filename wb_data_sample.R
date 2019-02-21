@@ -1,9 +1,10 @@
+library(tidyverse)
 library(wbstats)
 
-#rm(list = ls()); gc()
+rm(list = ls()); gc()
 
 # 192 fabio regions
-fabio_regions <- as.character(c("ARM","AFG","ALB","DZA","AGO","ATG","ARG","AUS",
+iso_fabio <- as.character(c("ARM","AFG","ALB","DZA","AGO","ATG","ARG","AUS",
                                 "AUT","BHS","BHR","BRB","BLX","BGD","BOL","BWA",
                                 "BRA","BLZ","SLB","BRN","BGR","MMR","BDI","CMR",
                                 "CAN","CPV","CAF","LKA","TCD","CHL","CHN","COL",
@@ -27,27 +28,47 @@ fabio_regions <- as.character(c("ARM","AFG","ALB","DZA","AGO","ATG","ARG","AUS",
                                 "ARE","UGA","SUN","GBR","UKR","USA","BFA","URY",
                                 "UZB","VEN","VNM","ETH","WSM","YUG","YEM","COD",
                                 "ZMB","BEL","LUX","SRB","MNE","SDN","SSD","ROW"))
-fabio_regions <- fabio_regions[1:10]
+# subset sample of first 10 countries
+# iso_fabio <- iso_fabio[1:10]
 
-# population data from world bank
-wb_pop <- wb(indicator = "SP.POP.TOTL", startdate = 2013, enddate = 2013) %>% 
-  subset(subset = iso3c %in% fabio_regions) %>% 
+# get information on world bank database
+str(wb_cachelist, max.level = 1)
+
+# check for common countries between fabio and world bank
+iso_wb <- wb_cachelist[["countries"]][["iso3c"]]
+iso_match <- intersect(iso_fabio, iso_wb)
+setdiff(iso_fabio, iso_match)
+
+# retrieves population data for all relevant years
+wb_pop_all <- wb(indicator = "SP.POP.TOTL", startdate = 1986, enddate = 2013)
+  
+# retrieves population data for 1986 and selects matching countries
+wb_pop_1986 <- wb(indicator = "SP.POP.TOTL", startdate = 1986, enddate = 1986) %>% 
+  subset(subset = iso3c %in% iso_fabio) %>% 
+  dplyr::select(value, iso3c)
+
+setdiff(iso_fabio, wb_pop_1986$iso3c)
+
+# retrieves population data for 2013 and selects matching countries
+wb_pop_2013 <- wb(indicator = "SP.POP.TOTL", startdate = 2013, enddate = 2013) %>% 
+  subset(subset = iso3c %in% iso_fabio) %>% 
   dplyr::select(value) %>% 
   as.matrix()
 
 # GDP data from world bank
-wb_gdp <- wb(indicator = "NY.GDP.MKTP.CD", startdate = 2013, enddate = 2013) %>% 
-  subset(subset = iso3c %in% fabio_regions) %>% 
+wb_gdp_2013 <- wb(indicator = "NY.GDP.MKTP.CD", startdate = 2013, enddate = 2013) %>% 
+  subset(subset = iso3c %in% iso_fabio) %>% 
   dplyr::select(value) %>% 
   as.matrix()
 
-# GDP per capita
-gdp_per_capita <- wb_gdp / wb_pop
+# GDP per capita (geht nicht weil vektoren unterschiedlich lang sind)
+gdp_per_capita <- wb_gdp_2013 / wb_pop_2013
 
 # implement per capita function
 source("per_capita.R")
 
-gdp_per_capita_f <- per_capita(fabio_regions, wb_gdp, year = 2013) %>% 
+# geht auch nicht, weil vektoren unterschiedlich lang sind
+gdp_per_capita_f <- per_capita(iso_fabio, wb_gdp_2013, year = 2013) %>% 
   dplyr::select(value) %>% 
   as.matrix()
 

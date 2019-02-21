@@ -2,6 +2,10 @@ memory.limit(16000)
 
 #rm(list = ls()); gc()
 
+#----------------------------------------------------------------------------
+# create sample dataset of the first 10 countries for 2012 and 2013
+#----------------------------------------------------------------------------
+
 # load data files for 2013
 load("C:/Users/Zoe/Desktop/FABIO/2013_E.RData")
 load("C:/Users/Zoe/Desktop/FABIO/2013_X.RData")

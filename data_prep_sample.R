@@ -7,6 +7,7 @@ memory.limit(8000)
 
 rm(list = ls()); gc()
 
+
 #####################################
 #
 # Decomposition of F = ULY
@@ -20,43 +21,61 @@ load("C:/Users/Zoe/Desktop/FABIO/2013_L.RData")
 load("C:/Users/Zoe/Desktop/FABIO/2013_Y.RData")
 
 # reduce data to sample size of 10 countries
-str(E)
-str(X)
-str(L)
-str(Y)
 E <- E[1:1300,]
 X <- X[1:1300]
 L <- L[1:1300, 1:1300]
 Y <- Y[1:1300, 1:40]
 
+# divide each element of a matrix by its column sum
+divide <- function(x) { t(t(x) / rowSums(t(x))) }
+
 #-------------------------------
 # built U (ha/1000t)
 #-------------------------------
   
-u <- E$Landuse / X
-u[is.nan(u)] <- 0
-U <- diag(u)
+U <- E$Landuse / X
+U[is.nan(U)] <- 0 
+U <- diag(U)
 
 #-------------------------------
 # decompose L
 #-------------------------------
 
 # level of total input requirements (Ljs)
-llev <- colSums(L)
+llev <- colSums(L) %>% 
+  as.matrix()
 
 # distribution of supplier countries (Ljrs/Ljs)
-ljrs_list <- split.data.frame(as.data.frame(L), rep(1:10, each = 130))
-ljrs_list_sum <- lapply(ljrs_list, FUN = colSums)
-ljrs <- do.call(rbind, ljrs_list_sum)
-as.matrix(ljrs)
-lsup <- ljrs %*% t(ginv(llev))
+L_list <- split.data.frame(L, rep(1:10, each = 130))
+ljrs_list <- map(L_list, colSums)
+ljrs <- do.call(rbind, ljrs_list) 
+lsup <- divide(ljrs)
 lsup[is.nan(lsup)] <- 0
+head(colSums(lsup))
 
 # distribution of intermediate products (Lijrs/Ljrs)
-lpro <- L %*% ginv(ljrs)
+lpro_list <- map(L_list, divide) # elements are matrices
+lpro <- do.call(rbind, lpro_list)
+lpro[is.nan(lpro)] <- 0
+head(colSums(lpro))
 
-L_dec <- lpro %*% lsup %*% llev
-all.equal(L, L_dec)
+# check lsup (lsup * llev = ljrs)
+L_test <- sweep(lsup, 2, llev, '*')
+all.equal(L_test, ljrs)
+
+# check lpro (lpro * ljrs = L)
+lpro_list_n <- split.data.frame(lpro, rep(1:10, each = 130)) # elements are matrices
+out <- list()
+for (i in seq_along(lpro_list_n)) {
+  out[[i]] <- lpro_list_n[[i]] %*% diag(ljrs_list[[i]])
+}
+L_test2 <- do.call(rbind, out) 
+all.equal(L_test2, L)
+
+# 
+L_dec <- (L/ljrs) * (ljrs/llev) * llev
+L_dec <- lpro * lsup * llev
+all.equal(L_dec, L)
 
 #-------------------------------
 # decompose Y
@@ -74,7 +93,7 @@ ys <- as.matrix(colSums(Y))
 yrs_list <- split.data.frame(Y_df_Food, rep(1:10, each = 130))
 
 # sum up columns of each data frame
-yrs_list_sum <- lapply(yrs_list, FUN = colSums)
+yrs_list_sum <- map(yrs_list, colSums)
 
 # merge list of column sums into matrix
 yrs <- do.call(rbind, yrs_list_sum) %>% 

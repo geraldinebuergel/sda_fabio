@@ -40,17 +40,16 @@ setdiff(fabio_regions, wb_pop_data$iso3c)
 # BLX = BEL+LUX
 # SCG = serbia+MNE
 # TWN = CHN+taiwan
-# SUN(until 1991) = RUS+EST+LTU+LVA+ARM+AZE+BLR+GEO+KAZ+KGZ+MDA+TKM+UKR+UZB
+# SUN(bis 1991) = RUS+EST+LTU+LVA+ARM+AZE+BLR+GEO+KAZ+KGZ+MDA+TKM+UKR+UZB
+# SRB ab 1990, davor = 0
+# TWN gibts nicht
 
-# get GDP data from world bank for 197 regions
-wb_gdp_data <- wb(indicator = "NY.GDP.MKTP.CD", startdate = 1986, enddate = 1986)
+# GDP data from world bank in constant 2010 USD
+wb_gdp_constant <- wb(indicator = "NY.GDP.MKTP.KD", startdate = 1986, enddate = 1986)
+
+# GDP data in current USD
+wb_gdp_current <- wb(indicator = "NY.GDP.MKTP.CD", startdate = 1986, enddate = 1986)
 
 # only 143 common regions with fabio -> 49 regions do not match
-com_gdp_regions <- intersect(fabio_regions, wb_gdp_data$iso3c)
-setdiff(fabio_regions, wb_gdp_data$iso3c)
-
-# implement per capita function
-source("per_capita.R")
-
-# get GDP per capita
-per_capita(wb_gdp_data)
+com_gdp_regions <- intersect(fabio_regions, wb_gdp_current$iso3c)
+setdiff(fabio_regions, wb_gdp_current$iso3c)
