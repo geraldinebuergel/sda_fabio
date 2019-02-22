@@ -42,8 +42,7 @@ U <- diag(U)
 #-------------------------------
 
 # level of total input requirements (Ljs)
-llev <- colSums(L) %>% 
-  as.matrix()
+llev <- colSums(L)
 
 # distribution of supplier countries (Ljrs/Ljs)
 L_list <- split.data.frame(L, rep(1:10, each = 130))
@@ -72,10 +71,9 @@ for (i in seq_along(lpro_list_n)) {
 L_test2 <- do.call(rbind, out) 
 all.equal(L_test2, L)
 
-# 
-L_dec <- (L/ljrs) * (ljrs/llev) * llev
-L_dec <- lpro * lsup * llev
-all.equal(L_dec, L)
+# combine lpro, lsup and llev back to L
+L_dec <- t(lpro %*% t(lsup)) %*% diag(llev)
+all.equal(L_dec, ljrs)
 
 #-------------------------------
 # decompose Y
