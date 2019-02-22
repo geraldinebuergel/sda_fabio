@@ -1,10 +1,17 @@
 memory.limit(16000)
 
-#rm(list = ls()); gc()
+rm(list = ls()); gc()
 
 #----------------------------------------------------------------------------
 # create sample dataset of the first 10 countries for 2012 and 2013
 #----------------------------------------------------------------------------
+
+setwd("C:/Users/Zoe/Desktop/temp/")
+
+file_names <-  list.files(pattern = "*.RData")
+myfiles_list <-  map(file_names, load, .GlobalEnv)
+
+setwd("C:/Users/Zoe/Desktop/sda_fabio/")
 
 # load data files for 2013
 load("C:/Users/Zoe/Desktop/FABIO/2013_E.RData")
