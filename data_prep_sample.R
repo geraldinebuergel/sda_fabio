@@ -8,11 +8,11 @@ memory.limit(8000)
 rm(list = ls()); gc()
 
 
-#####################################
+#------------------------------------------
 #
 # Decomposition of F = ULY
 #
-#####################################
+#------------------------------------------
 
 # load data files
 load("C:/Users/Zoe/Desktop/FABIO/2013_E.RData")
@@ -46,7 +46,7 @@ llev <- colSums(L)
 
 # distribution of supplier countries (Ljrs/Ljs)
 L_list <- split.data.frame(L, rep(1:10, each = 130))
-ljrs_list <- map(L_list, colSums)
+ljrs_list <- map(L_list, colSums) # map_dfr() should return data frame
 ljrs <- do.call(rbind, ljrs_list) 
 lsup <- divide(ljrs)
 lsup[is.nan(lsup)] <- 0

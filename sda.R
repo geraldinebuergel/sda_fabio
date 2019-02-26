@@ -5,7 +5,9 @@ rm(list = ls()); gc()
 source("data_sample.R")
 
 #---------------------------------
-# SDA
+# 
+# SDA FUNCTION
+#
 #---------------------------------
 
 # delta function 
