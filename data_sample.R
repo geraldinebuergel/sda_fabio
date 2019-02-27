@@ -17,7 +17,6 @@ setwd("C:/Users/Zoe/Desktop/temp/")
 E_names <-  list.files(pattern = "*_E.RData")
 E_list <-  map(E_names, function(x) mget(load(x)))
 E_list_df <- map(E_list, as.data.frame)
-names(E_list_df) <- c(2011:2013)
 E_landuse <- map(E_list_df, dplyr::select, contains("E.Landuse"))
 E_landuse_sample <- map(E_landuse, slice, 1:1300)
 
@@ -25,33 +24,36 @@ E_landuse_sample <- map(E_landuse, slice, 1:1300)
 X_names <-  list.files(pattern = "*_X.RData")
 X_list <-  map(X_names, function(x) mget(load(x)))
 X_list_df <- map(X_list, as.data.frame)
-names(X_list_df) <- c(2011:2013)
 X_sample <- map(X_list_df, slice, 1:1300)
 
 # calculate U and replace NaN values with zero
 U_sample <- list()
-for(i in seq_along(2011:2013)){
+for(i in seq_along(1:3)){
   U_sample[[i]] <- E_landuse_sample[[i]] / X_sample[[i]]
 }
-rapply(U_sample, function(x) ifelse(is.nan(x),0,x), how="unlist")
-names(U_sample) <- c(2011:2013)
+U_sample0 <- rapply(U_sample, function(x) ifelse(is.nan(x),0,x), how="list")
+U_sample_unlist <- list()
+for (i in 1:3){
+  U_sample_unlist[[i]] <- U_sample0[[i]][["E.Landuse"]]
+}
+U_sample_diag <- map(U_sample_unlist, diag)
 
 # load L files
 L_names <-  list.files(pattern = "*_L.RData")
 L_list <-  map(L_names, function(x) mget(load(x)))
 L_list_df <- map(L_list, as.data.frame)
-names(L_list_df) <- c(2011:2013)
 L_sample <- map(L_list_df, slice, 1:1300)
 L_sample <- map(L_sample, dplyr::select, 1:1300)
+L_sample <- map(L_sample, as.matrix)
 
 # load Y files and subset food columns
 Y_names <-  list.files(pattern = "*_Y.RData")
 Y_list <-  map(Y_names, function(x) mget(load(x)))
 Y_list_df <- map(Y_list, as.data.frame)
-names(Y_list_df) <- c(2011:2013)
 Y_sample <- map(Y_list_df, slice, 1:1300)
 Y_sample <- map(Y_sample, dplyr::select, contains("Food"))
 Y_sample <- map(Y_sample, dplyr::select, 1:40)
+Y_sample <- map(Y_sample, as.matrix)
 
 setwd("C:/Users/Zoe/Desktop/sda_fabio/")
 
