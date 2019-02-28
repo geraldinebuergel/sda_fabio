@@ -3,7 +3,7 @@ library(MASS)
 require(MASS)
 require(dplyr)
 memory.limit()
-memory.limit(8000)
+memory.limit(16000)
 
 rm(list = ls()); gc()
 
@@ -103,17 +103,18 @@ ysup <- yrs %*% t(ginv(ys))
 # get distribution of products (yirs/yrs)
 ypro <- Y %*% ginv(yrs)
 
-# implement world bank data including per capita function
-source("wb_data_sample.R")
+load("C:/Users/Zoe/Desktop/FABIO/GDP_deflated.RData")
+load("C:/Users/Zoe/Desktop/FABIO/GDP_per_capita.RData")
+load("C:/Users/Zoe/Desktop/FABIO/Population.RData")
 
 # level of final demand per GDP (ys/GDP)
-ylev <- ys / wb_gdp
+#ylev <- ys / gdp
   
 # GDP per capita
-G <- gdp_per_capita_f
+G <- gdp_per_capita
   
 # population
-P <- wb_pop
+P <- pop
 
 Y_dec <- ypro %*% ysup %*% t(ylev) %*% G %*% t(P)
 all.equal(Y, Y_dec)
