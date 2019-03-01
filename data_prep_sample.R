@@ -43,6 +43,7 @@ U <- diag(U)
 
 # level of total input requirements (Ljs)
 llev <- colSums(L)
+llev_expanded <- matrix(llev, nrow = 1300, ncol = length(llev), byrow = TRUE)
 
 # distribution of supplier countries (Ljrs/Ljs)
 L_list <- split.data.frame(L, rep(1:10, each = 130))
@@ -50,30 +51,16 @@ ljrs_list <- map(L_list, colSums) # map_dfr() should return data frame
 ljrs <- do.call(rbind, ljrs_list) 
 lsup <- divide(ljrs)
 lsup[is.nan(lsup)] <- 0
-head(colSums(lsup))
+lsup_expanded <-  lsup[rep(1:nrow(lsup), each = 130), ] 
 
 # distribution of intermediate products (Lijrs/Ljrs)
 lpro_list <- map(L_list, divide) # elements are matrices
 lpro <- do.call(rbind, lpro_list)
 lpro[is.nan(lpro)] <- 0
-head(colSums(lpro))
-
-# check lsup (lsup * llev = ljrs)
-L_test <- sweep(lsup, 2, llev, '*')
-all.equal(L_test, ljrs)
-
-# check lpro (lpro * ljrs = L)
-lpro_list_n <- split.data.frame(lpro, rep(1:10, each = 130)) # elements are matrices
-out <- list()
-for (i in seq_along(lpro_list_n)) {
-  out[[i]] <- lpro_list_n[[i]] %*% diag(ljrs_list[[i]])
-}
-L_test2 <- do.call(rbind, out) 
-all.equal(L_test2, L)
 
 # combine lpro, lsup and llev back to L
-L_dec <- t(lpro %*% t(lsup)) %*% diag(llev)
-all.equal(L_dec, ljrs)
+L_dec <- lpro * lsup_expanded * llev_expanded
+all.equal(L_dec, L)
 
 #-------------------------------
 # decompose Y
@@ -84,51 +71,54 @@ Y_df_Food <- as.data.frame(Y) %>%
   dplyr::select(contains("Food"))
 Y <- as.matrix(Y_df_Food)
 
-# create column sums
 ys <- as.matrix(colSums(Y))
+ys_expanded <- matrix(ys, nrow = 1300, ncol = length(ys), byrow = TRUE)
 
-# split Y into list of 10 data frames with 130 rows each
 yrs_list <- split.data.frame(Y_df_Food, rep(1:10, each = 130))
-
-# sum up columns of each data frame
 yrs_list_sum <- map(yrs_list, colSums)
-
-# merge list of column sums into matrix
 yrs <- do.call(rbind, yrs_list_sum) %>% 
   as.matrix()
+yrs_expanded <- yrs[rep(1:nrow(yrs), each = 130), ] 
 
-# get distribution of supplier countries (yrs/ys)
-ysup <- yrs %*% t(ginv(ys))
+# distribution of supplier countries (yrs/ys)
+ysup <- divide(yrs)
+ysup_expanded <- ysup[rep(1:nrow(ysup), each = 130), ] 
 
-# get distribution of products (yirs/yrs)
-ypro <- Y %*% ginv(yrs)
+# distribution of products (yirs/yrs)
+ypro <- Y / yrs_expanded
+
+# check
+Y_dec <- ypro * ysup_expanded * ys_expanded
+all.equal(Y_dec, Y)
 
 load("C:/Users/Zoe/Desktop/FABIO/GDP_deflated.RData")
 load("C:/Users/Zoe/Desktop/FABIO/GDP_per_capita.RData")
 load("C:/Users/Zoe/Desktop/FABIO/Population.RData")
 
+gdp <- gdp[[28]][1:10, ]
+gdp1 <- rep(gdp, each = 130)
+gdp_expanded <- matrix(gdp1, nrow = length(gdp1), ncol = 10)
+
 # level of final demand per GDP (ys/GDP)
-#ylev <- ys / gdp
+ylev <- ys_expanded / gdp_expanded
   
 # GDP per capita
-G <- gdp_per_capita
+G <- gdp_per_capita[[28]][1:10, ]
+G1 <- rep(G, each = 130)
+G_expanded <- matrix(G1, nrow = length(G1), ncol = 10)
   
 # population
-P <- pop
+P <- pop[[28]][1:10, ]
+P1 <- rep(P, each = 130)
+P_expanded <- matrix(P1, nrow = length(P1), ncol = 10)
 
-Y_dec <- ypro %*% ysup %*% t(ylev) %*% G %*% t(P)
-all.equal(Y, Y_dec)
-
-all.equal(as.matrix(ys), t(ylev) %*% G %*% t(P))
-near(Y, ypro %*% ysup %*% t(ys))
+Y_dec2 <- ypro * ysup_expanded * ylev * G_expanded * P_expanded
+all.equal(Y, Y_dec2)
 
 #-------------------------------
-# finished land footprint
+# assemble to land footprint
 #-------------------------------
 
 F <- U %*% L %*% Y  
-F_dec <- U %*% L_dec %*% Y_dec
-F_dec_all <- U %*% lpro %*% lsup %*% llev %*% ypro %*% ysup %*% ys
-sum(is.nan(F))
-sum(is.nan(F_dec))
-near(F, F_dec)
+F_dec <- U %*% L_dec %*% Y_dec2
+all.equal(F_dec, F)
