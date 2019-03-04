@@ -1,5 +1,6 @@
 library(tidyverse)
-memory.limit(16000)
+memory.limit()
+memory.limit(64000)
 
 rm(list = ls()); gc()
 
@@ -38,13 +39,20 @@ for (i in 1:3){
 }
 U_sample_diag <- map(U_sample_unlist, diag)
 
+# save U
+save(U_sample0, file = "U_vector_sample.RData")
+save(U_sample_diag, file = "U_diag_sample.RData")
+
 # load L files
 L_names <-  list.files(pattern = "*_L.RData")
-L_list <-  map(L_names, function(x) mget(load(x)))
-L_list_df <- map(L_list, as.data.frame)
-L_sample <- map(L_list_df, slice, 1:1300)
-L_sample <- map(L_sample, dplyr::select, 1:1300)
-L_sample <- map(L_sample, as.matrix)
+L_sample <-  lapply(L_names, function(x) mget(load(x)))
+L_sample <- lapply(L_list, as.data.frame)
+L_sample <- lapply(L_list_df, slice, 1:1300)
+L_sample <- lapply(L_sample, dplyr::select, 1:1300)
+L_sample <- lapply(L_sample, as.matrix)
+
+# save L file
+save(L_sample, file = "L_sample.RData")
 
 # load Y files and subset food columns
 Y_names <-  list.files(pattern = "*_Y.RData")
@@ -52,43 +60,10 @@ Y_list <-  map(Y_names, function(x) mget(load(x)))
 Y_list_df <- map(Y_list, as.data.frame)
 Y_sample <- map(Y_list_df, slice, 1:1300)
 Y_sample <- map(Y_sample, dplyr::select, contains("Food"))
-Y_sample <- map(Y_sample, dplyr::select, 1:40)
+Y_sample <- map(Y_sample, dplyr::select, 1:10)
 Y_sample <- map(Y_sample, as.matrix)
 
+# save Y
+save(Y_sample, file = "Y_sample.RData")
+
 setwd("C:/Users/Zoe/Desktop/sda_fabio/")
-
-#------------------------------------------------
-#
-# load data individually
-#
-#------------------------------------------------
-
-# function to calculate U
-fun_u <- function(E, X){
-  u <- E$E.Landuse / X
-  u[is.nan(u)] <- 0
-  diag(u)
-}
-
-# calculate sample size of U
-U_2013 <- fun_u(E[1:1300,], X[1:1300])
-
-# reduce L to sample size
-L_2013 <- L[1:1300, 1:1300]
-
-# function to get Y with food columns only
-food <- function(Y){
-  Y_df <- as.data.frame(Y)
-  Y_df_Food <- dplyr::select(Y_df, contains("Food"))
-  as.matrix(Y_df_Food)
-}
-
-# reduce Y to sample size with food columns only
-Y_2013 <- food(Y[1:1300, 1:40])
-
-# repeat data conversion
-U_2012 <- fun_u(E[1:1300,], X[1:1300])
-
-L_2012 <- L[1:1300, 1:1300]
-
-Y_2012 <- food(Y[1:1300, 1:40])
