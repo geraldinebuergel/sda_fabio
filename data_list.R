@@ -1,6 +1,6 @@
 library(tidyverse)
 memory.limit()
-memory.limit(64000)
+memory.limit(100000)
 
 rm(list = ls()); gc()
 
@@ -11,7 +11,7 @@ rm(list = ls()); gc()
 #----------------------------------------------------------------------------
 
 # replace path with fabio data folder
-setwd("C:/Users/Zoe/Desktop/temp/")
+#setwd("C:/Users/Zoe/Desktop/temp/")
 
 # load E files and subset landuse columns
 E_list <-  list.files(pattern = "*_E.RData") %>% 
@@ -36,7 +36,7 @@ U_diag <- map2(X_list2, E_landuse, ~.x / .y) %>%
   lapply(diag)
 
 # save U 
-save(U_diag, file = "U_diag.RData")
+#save(U_diag, file = "U_diag.RData")
 
 # load L files
 L_list <- list.files(pattern = "*_L.RData") %>% 
@@ -46,7 +46,7 @@ L_list <- list.files(pattern = "*_L.RData") %>%
   lapply(as.matrix)
 
 # save L
-save(L_list, file = "L_list.RData")
+#save(L_list, file = "L_list.RData")
 
 # load Y files and subset food columns
 Y_list <-  list.files(pattern = "*_Y.RData") %>% 
@@ -57,6 +57,6 @@ Y_list <-  list.files(pattern = "*_Y.RData") %>%
   map(~.x[-c(24831:24960), -192])
 
 # save Y
-save(Y_list, file = "Y_list.RData")
+#save(Y_list, file = "Y_list.RData")
 
 #setwd("C:/Users/Zoe/Desktop/sda_fabio/")

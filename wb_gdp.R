@@ -55,7 +55,7 @@ write.xlsx(def_usa, "C:/Users/Zoe/Desktop/wb_def.xlsx")
 split_tibble <- function(tibble, col = 'col') tibble %>% split(., .[,col])
 
 gdp1 <- read_xlsx("C:/Users/Zoe/Desktop/fabio_GDP_constant.xlsx")
-gdp <- gdp1[, -c(6,7)] %>% 
+gdp <- gdp1[, 2:5] %>% 
   split_tibble("Year") %>% 
   map(~.x[["Value"]])
 
