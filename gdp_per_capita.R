@@ -2,7 +2,7 @@ library(tidyverse)
 
 rm(list = ls()); gc()
 
-load("GDP_deflated.RData")
+load("GDP.RData")
 load("Population.RData")
 
 gdp_per_capita <- list()
