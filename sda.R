@@ -40,12 +40,23 @@ F_fun <- SDA(U_sample_diag[[3]], U_sample_diag[[2]], L_sample[[3]], L_sample[[2]
              Y_sample[[3]], Y_sample[[2]])
 all.equal(F_soll3, F_fun[["delta_F"]])
 
+SDA2 <- function(U_1, U_0, L_1, L_0, Y_1, Y_0){
+  con_U <- 0.5*((U_1 - U_0) %*% L_1 %*% Y_1) + 0.5*((U_1 - U_0) %*% L_0 %*% Y_0)
+           
+  con_L <- 0.5*(U_0 %*% (L_1 - L_0) %*% Y_1) + 0.5*(U_1 %*% (L_1 - L_0) %*% Y_0)
+               
+  con_Y <- 0.5*(U_0 %*% L_0 %*% (Y_1 - Y_0)) + 0.5*(U_1 %*% L_1 %*% (Y_1 - Y_0))
+               
+  delta_F <- con_U + con_L + con_Y 
+  return(list(delta_F = delta_F, con_U = con_U, con_L = con_L, con_Y = con_Y))
+}
+
 # loop SDA function with list inputs
 loop <- list()
 for (i in seq_along(3:2)){
-    loop[[i]] <- SDA(U_sample_diag[[i]], U_sample_diag[[(i-1)]], 
-                     L_sample[[i]], L_sample[[(i-1)]],
-                     Y_sample[[i]], Y_sample[[(i-1)]])
+    loop[[i]] <- SDA2(U_sample_diag[[i]], U_sample_diag[[(i-1)]], 
+                      L_sample[[i]], L_sample[[(i-1)]],
+                      Y_sample[[i]], Y_sample[[(i-1)]])
 }
 
 for (i in 3:2) {
@@ -81,15 +92,15 @@ SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0, ypro1, ypr
 loop_dec <- list()
 for (i in seq_along(length(lpro):2)){
   for (j in seq_along(2:1)){
-    loop_dec[[i]] <- SDA_dec(U_sample_diag[[i]], U_sample_diag[[j]], 
+    loop_dec[[i]] <- SDA_dec(U_diag[[i]], U_diag[[j]], 
                              lpro[[i]], lpro[[j]], 
-                             lsup_expanded[[i]], lsup_expanded[[j]],
-                             llev_expanded[[i]], llev_expanded[[j]],
-                             ypro[[i]], ypro[[j]], 
-                             ysup_expanded[[i]], ysup_expanded[[j]],
+                             lsup[[i]], lsup[[j]],
+                             llev[[i]], llev[[j]],
+                             ypro[[i]], ypro[[j]],
+                             ysup[[i]], ysup[[j]],
                              ylev[[i]], ylev[[j]], 
-                             G_expanded[[i]], G_expanded[[j]],
-                             P_expanded[[i]], P_expanded[[j]])
+                             G[[i]], G[[j]],
+                             P[[i]], P[[j]])
   }
 }
 
@@ -101,7 +112,7 @@ for (i in 1:10) {
     }   
   }
 }   
-for (i in 3:1) {
+for (i in 3:2) {
   for (j in 2:1) {
       cat(i," ",j,"\n")
   }
