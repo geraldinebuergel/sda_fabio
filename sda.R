@@ -8,9 +8,13 @@ rm(list = ls()); gc()
 #
 #---------------------------------
 
-load("C:/Users/Zoe/Desktop/temp/U_diag_sample.RData")
-load("C:/Users/Zoe/Desktop/temp/L_sample.RData")
-load("C:/Users/Zoe/Desktop/temp/Y_sample.RData")
+# load("C:/Users/Zoe/Desktop/temp/U_diag_sample.RData")
+# load("C:/Users/Zoe/Desktop/temp/L_sample.RData")
+# load("C:/Users/Zoe/Desktop/temp/Y_sample.RData")
+
+load("F:/temp/U_diag.RData")
+load("F:/temp/L_list.RData")
+load("F:/temp/Y_list.RData")
 
 # average function
 avg <- function(x, y){(0.5 * x) + (0.5 * y)}
@@ -53,7 +57,7 @@ SDA2 <- function(U_1, U_0, L_1, L_0, Y_1, Y_0){
 
 # loop SDA function with list inputs
 loop <- list()
-for (i in seq_along(3:2)){
+for (i in 2:3){
     loop[[i]] <- SDA2(U_sample_diag[[i]], U_sample_diag[[(i-1)]], 
                       L_sample[[i]], L_sample[[(i-1)]],
                       Y_sample[[i]], Y_sample[[(i-1)]])
