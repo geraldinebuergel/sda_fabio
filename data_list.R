@@ -1,6 +1,4 @@
 library(tidyverse)
-memory.limit()
-memory.limit(100000)
 
 rm(list = ls()); gc()
 
@@ -12,36 +10,36 @@ rm(list = ls()); gc()
 
 mount_wu_share()
 
+fabio <- "/mnt/nfs_fineprint/tmp/fabio/"
 
 # load E files and subset landuse columns
-E_list <-  list.files(pattern = "/mnt/nfs_fineprint/tmp/fabio/*_E.RData") %>% 
-  map(~ mget(load(.x)))
+E_list <-  list.files(path = fabio, pattern = "*_E.RData") %>% 
+  map(~ mget(load(paste0(fabio,.x))))
 E_landuse <- list()
 for (i in seq_along(1:length(E_list))){
   E_landuse[[i]] <- E_list[[i]][["E"]][["Landuse"]]
 }
 
 # load X files
-X_list <-  list.files(pattern = "/mnt/nfs_fineprint/tmp/fabio/*_X.RData") %>% 
-  map(~ mget(load(.x)))
+X_list <-  list.files(path = fabio, pattern = "*_X.RData") %>% 
+  map(~ mget(load(paste0(fabio,.x))))
 X_list2 <- list()
 for (i in seq_along(1:length(X_list))){
   X_list2[[i]] <- X_list[[i]][["X"]]
 }
 
 # calculate U and replace NaN values with zero
-U_diag <- map2(X_list2, E_landuse, ~.x / .y) %>% 
+U_list <- map2(E_landuse, X_list2, ~.x / .y) %>% 
   rapply(function(x) ifelse(is.nan(x), 0, x), how = "list") %>% 
-  map(~.x[-c(24831:24960)]) %>% 
-  lapply(diag)
+  map(~.x[-c(24831:24960)])
 
 # save U 
-save(U_diag, file = "U_diag.RData")
+save(U_list, file = "U_list.RData")
 
 # load L files
-L_list <- list.files(pattern = "/mnt/nfs_fineprint/tmp/fabio/*_L.RData") %>% 
-  map(~ mget(load(.x))) %>% 
-  lapply(as.data.frame) %>% 
+L_list <- list.files(path = fabio, pattern = "*_L.RData") %>% 
+  map(~ mget(load(paste0(fabio,.x)))) %>% 
+  # lapply(as.data.frame) %>% 
   map(~.x[-c(24831:24960), -c(24831:24960)]) %>% 
   lapply(as.matrix)
 
@@ -49,8 +47,8 @@ L_list <- list.files(pattern = "/mnt/nfs_fineprint/tmp/fabio/*_L.RData") %>%
 save(L_list, file = "L_list.RData")
 
 # load Y files and subset food columns
-Y_list <-  list.files(pattern = "/mnt/nfs_fineprint/tmp/fabio/*_Y.RData") %>% 
-  map(~ mget(load(.x))) %>% 
+Y_list <-  list.files(path = fabio, pattern = "*_Y.RData") %>% 
+  map(~ mget(load(paste0(fabio,.x)))) %>% 
   lapply(as.data.frame) %>% 
   lapply(dplyr::select, contains("Food")) %>% 
   lapply(as.matrix) %>% 

@@ -8,21 +8,21 @@ rm(list = ls()); gc()
 #
 #---------------------------------
 
-# load("C:/Users/Zoe/Desktop/temp/U_diag_sample.RData")
+# load("C:/Users/Zoe/Desktop/temp/U_sample.RData")
 # load("C:/Users/Zoe/Desktop/temp/L_sample.RData")
 # load("C:/Users/Zoe/Desktop/temp/Y_sample.RData")
 
-load("F:/temp/U_diag.RData")
-load("F:/temp/L_list.RData")
-load("F:/temp/Y_list.RData")
+load("U_list.RData")
+load("L_list.RData")
+load("Y_list.RData")
 
 # average function
 avg <- function(x, y){(0.5 * x) + (0.5 * y)}
 
 # reference for what delta F should be
-F_2011 <- U_sample_diag[[1]] %*% L_sample[[1]] %*% Y_sample[[1]]
-F_2012 <- U_sample_diag[[2]] %*% L_sample[[2]] %*% Y_sample[[2]]
-F_2013 <- U_sample_diag[[3]] %*% L_sample[[3]] %*% Y_sample[[3]]
+F_2011 <- U_sample[[1]] %*% L_sample[[1]] %*% Y_sample[[1]]
+F_2012 <- U_sample[[2]] %*% L_sample[[2]] %*% Y_sample[[2]]
+F_2013 <- U_sample[[3]] %*% L_sample[[3]] %*% Y_sample[[3]]
 F_soll3 <- F_2013 - F_2012
 F_soll2 <- F_2012 - F_2011
 
@@ -40,7 +40,7 @@ SDA <- function(U_1, U_0, L_1, L_0, Y_1, Y_0){
 }
 
 # check function -> it works!
-F_fun <- SDA(U_sample_diag[[3]], U_sample_diag[[2]], L_sample[[3]], L_sample[[2]], 
+F_fun <- SDA(U_sample[[3]], U_sample[[2]], L_sample[[3]], L_sample[[2]], 
              Y_sample[[3]], Y_sample[[2]])
 all.equal(F_soll3, F_fun[["delta_F"]])
 
@@ -58,7 +58,7 @@ SDA2 <- function(U_1, U_0, L_1, L_0, Y_1, Y_0){
 # loop SDA function with list inputs
 loop <- list()
 for (i in 2:3){
-    loop[[i]] <- SDA2(U_sample_diag[[i]], U_sample_diag[[(i-1)]], 
+    loop[[i]] <- SDA2(U_sample[[i]], U_sample[[(i-1)]], 
                       L_sample[[i]], L_sample[[(i-1)]],
                       Y_sample[[i]], Y_sample[[(i-1)]])
 }
@@ -96,7 +96,7 @@ SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0, ypro1, ypr
 loop_dec <- list()
 for (i in seq_along(length(lpro):2)){
   for (j in seq_along(2:1)){
-    loop_dec[[i]] <- SDA_dec(U_diag[[i]], U_diag[[j]], 
+    loop_dec[[i]] <- SDA_dec(U_list[[i]], U_list[[j]], 
                              lpro[[i]], lpro[[j]], 
                              lsup[[i]], lsup[[j]],
                              llev[[i]], llev[[j]],
