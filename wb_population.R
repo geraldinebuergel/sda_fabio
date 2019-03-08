@@ -14,10 +14,10 @@ rm(list = ls()); gc()
 # world bank population data
 wb_pop <- wb(indicator = "SP.POP.TOTL", startdate = 1986, enddate = 2013)
 
-write.xlsx(wb_pop, "C:/Users/Zoe/Desktop/wb_pop.xlsx")
+write.xlsx(wb_pop, "wb_pop.xlsx")
 
 # load rearranged population data (including some UN data)
-pop1 <- read_xlsx("C:/Users/Zoe/Desktop/fabio_Population.xlsx") %>% 
+pop1 <- read_xlsx("fabio_Population.xlsx") %>% 
   dplyr::select(2:5)
 
 split_tibble <- function(tibble, col = 'col') tibble %>% split(., .[,col])

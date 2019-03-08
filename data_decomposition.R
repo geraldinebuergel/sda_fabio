@@ -1,9 +1,5 @@
 library(tidyverse)
-memory.limit()
-memory.limit(100000)
-
 rm(list = ls()); gc()
-
 
 #----------------------------------------------------------------------------
 #
@@ -15,7 +11,7 @@ rm(list = ls()); gc()
 # decompose L
 #-------------------------------
 
-load("C:/Users/Zoe/Desktop/temp/L_list.RData")
+load("L_list.RData")
 
 # level of total input requirements (Ljs)
 llev <- lapply(L_list, colSums) %>% 
@@ -45,7 +41,7 @@ lpro <- map2(L_list, ljrs, ~.x / .y) %>%
 # decompose Y
 #-------------------------------
 
-load("C:/Users/Zoe/Desktop/temp/Y_list.RData")
+load("Y_list.RData")
 
 # total final demand for food (Ys)
 ys <- lapply(Y_list, colSums) %>% 
@@ -68,8 +64,8 @@ ypro <- map2(Y_list, yrs, ~.x / .y) %>%
 
 #save(ypro, file = "ypro_list.RData")
 
-load("C:/Users/Zoe/Desktop/temp/GDP.RData")
-load("C:/Users/Zoe/Desktop/temp/Population.RData")
+load("GDP.RData")
+load("Population.RData")
 
 gdp <- map(gdp, ~.x[rep(1:191, each = 130)]) %>% 
   map(~ matrix(.x, nrow = length(.x), ncol = 191))

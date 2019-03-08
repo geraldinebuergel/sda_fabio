@@ -10,11 +10,11 @@ rm(list = ls()); gc()
 #
 #----------------------------------------------------------------------------
 
-# replace path with fabio data folder
-#setwd("C:/Users/Zoe/Desktop/temp/")
+mount_wu_share()
+
 
 # load E files and subset landuse columns
-E_list <-  list.files(pattern = "*_E.RData") %>% 
+E_list <-  list.files(pattern = "/mnt/nfs_fineprint/tmp/fabio/*_E.RData") %>% 
   map(~ mget(load(.x)))
 E_landuse <- list()
 for (i in seq_along(1:length(E_list))){
@@ -22,7 +22,7 @@ for (i in seq_along(1:length(E_list))){
 }
 
 # load X files
-X_list <-  list.files(pattern = "*_X.RData") %>% 
+X_list <-  list.files(pattern = "/mnt/nfs_fineprint/tmp/fabio/*_X.RData") %>% 
   map(~ mget(load(.x)))
 X_list2 <- list()
 for (i in seq_along(1:length(X_list))){
@@ -36,20 +36,20 @@ U_diag <- map2(X_list2, E_landuse, ~.x / .y) %>%
   lapply(diag)
 
 # save U 
-#save(U_diag, file = "U_diag.RData")
+save(U_diag, file = "U_diag.RData")
 
 # load L files
-L_list <- list.files(pattern = "*_L.RData") %>% 
+L_list <- list.files(pattern = "/mnt/nfs_fineprint/tmp/fabio/*_L.RData") %>% 
   map(~ mget(load(.x))) %>% 
   lapply(as.data.frame) %>% 
   map(~.x[-c(24831:24960), -c(24831:24960)]) %>% 
   lapply(as.matrix)
 
 # save L
-#save(L_list, file = "L_list.RData")
+save(L_list, file = "L_list.RData")
 
 # load Y files and subset food columns
-Y_list <-  list.files(pattern = "*_Y.RData") %>% 
+Y_list <-  list.files(pattern = "/mnt/nfs_fineprint/tmp/fabio/*_Y.RData") %>% 
   map(~ mget(load(.x))) %>% 
   lapply(as.data.frame) %>% 
   lapply(dplyr::select, contains("Food")) %>% 
@@ -57,6 +57,4 @@ Y_list <-  list.files(pattern = "*_Y.RData") %>%
   map(~.x[-c(24831:24960), -192])
 
 # save Y
-#save(Y_list, file = "Y_list.RData")
-
-#setwd("C:/Users/Zoe/Desktop/sda_fabio/")
+save(Y_list, file = "Y_list.RData")
