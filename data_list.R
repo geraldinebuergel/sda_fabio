@@ -4,7 +4,7 @@ rm(list = ls()); gc()
 
 #----------------------------------------------------------------------------
 #
-# LOAD AND CONVERT DATA FILES (191 countries)
+# LOAD AND CONVERT DATA FILES (190 countries)
 #
 #----------------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ for (i in seq_along(1:length(X_list))){
 # calculate U and replace NaN values with zero
 U_list <- map2(E_landuse, X_list2, ~.x / .y) %>% 
   rapply(function(x) ifelse(is.nan(x), 0, x), how = "list") %>% 
-  map(~.x[-c(24831:24960)])
+  map(~.x[-c(24701:24960)])
 
 # save U 
 save(U_list, file = "U_list.RData")
@@ -40,7 +40,7 @@ save(U_list, file = "U_list.RData")
 L_list <- list.files(path = fabio, pattern = "*_L.RData") %>% 
   map(~ mget(load(paste0(fabio,.x)))) %>% 
   # lapply(as.data.frame) %>% 
-  map(~.x[-c(24831:24960), -c(24831:24960)]) %>% 
+  map(~.x[-c(24701:24960), -c(24701:24960)]) %>% 
   lapply(as.matrix)
 
 # save L
@@ -52,7 +52,7 @@ Y_list <-  list.files(path = fabio, pattern = "*_Y.RData") %>%
   lapply(as.data.frame) %>% 
   lapply(dplyr::select, contains("Food")) %>% 
   lapply(as.matrix) %>% 
-  map(~.x[-c(24831:24960), -192])
+  map(~.x[-c(24701:24960), -c(191, 192])
 
 # save Y
 save(Y_list, file = "Y_list.RData")

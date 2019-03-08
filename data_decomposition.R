@@ -15,15 +15,15 @@ load("L_list.RData")
 
 # level of total input requirements (Ljs)
 llev <- lapply(L_list, colSums) %>% 
-  lapply(matrix, nrow = 24830, ncol = 24830, byrow = TRUE)
+  lapply(matrix, nrow = 24700, ncol = 24700, byrow = TRUE)
 
 #save(llev, file = "llev_list.RData")
 
 # distribution of supplier countries (Ljrs/Ljs)
 ljrs <- lapply(L_list, as.data.frame) %>% 
-  lapply(split.data.frame, rep(1:191, each = 130)) %>% 
+  lapply(split.data.frame, rep(1:190, each = 130)) %>% 
   lapply(lapply, colSums) %>% 
-  map(~ matrix(unlist(.x), nrow = 191, ncol = 24830, byrow = TRUE)) %>% 
+  map(~ matrix(unlist(.x), nrow = 190, ncol = 24700, byrow = TRUE)) %>% 
   map(~ .x[rep(1:nrow(.x), each = 130), ])
 
 lsup <- map2(ljrs, llev, ~.x / .y) %>% 
@@ -45,12 +45,12 @@ load("Y_list.RData")
 
 # total final demand for food (Ys)
 ys <- lapply(Y_list, colSums) %>% 
-  lapply(matrix, nrow = 24830, ncol = 191, byrow = TRUE)
+  lapply(matrix, nrow = 24700, ncol = 190, byrow = TRUE)
 
 # distribution of supplier countries (Yrs/Ys)
-yrs <- lapply(Y_list, split.data.frame, rep(1:191, each = 130)) %>% 
+yrs <- lapply(Y_list, split.data.frame, rep(1:190, each = 130)) %>% 
   lapply(lapply, colSums) %>% 
-  map(~ matrix(unlist(.x), nrow = 191, ncol = 191, byrow = TRUE)) %>% 
+  map(~ matrix(unlist(.x), nrow = 190, ncol = 190, byrow = TRUE)) %>% 
   map(~ .x[rep(1:nrow(.x), each = 130), ])
 
 ysup <- map2(yrs, ys, ~.x / .y) %>% 
@@ -67,9 +67,8 @@ ypro <- map2(Y_list, yrs, ~.x / .y) %>%
 load("GDP.RData")
 load("Population.RData")
 
-gdp <- map(gdp, ~.x[rep(1:191, each = 130)]) %>% 
-  map(~ matrix(.x, nrow = length(.x), ncol = 191))
-#gdp <- list(gdp[[26]], gdp[[27]], gdp[[28]])
+gdp <- map(gdp, ~.x[rep(1:190, each = 130)]) %>% 
+  map(~ matrix(.x, nrow = length(.x), ncol = 190))
 
 # level of final demand per GDP (Ys/GDP)
 ylev <- map2(ys, gdp, ~.x / .y) %>% 
@@ -78,9 +77,8 @@ ylev <- map2(ys, gdp, ~.x / .y) %>%
 #save(ylev, file = "ylev_list.RData")
 
 # Population (P)
-P <- map(pop, ~.x[rep(1:191, each = 130)]) %>% 
-  map(~ matrix(.x, nrow = length(.x), ncol = 191))
-#P <- list(P[["2011"]], P[["2012"]], P[["2013"]])
+P <- map(pop, ~.x[rep(1:190, each = 130)]) %>% 
+  map(~ matrix(.x, nrow = length(.x), ncol = 190))
 
 # GDP per capita (G)
 G <- map2(gdp, P, ~.x / .y) %>% 
