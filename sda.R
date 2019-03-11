@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 library(tidyverse)
 
 rm(list = ls()); gc()
@@ -9,51 +8,72 @@ rm(list = ls()); gc()
 #
 #---------------------------------
 
-load("C:/Users/Zoe/Desktop/temp/U_sample_diag.RData")
-load("C:/Users/Zoe/Desktop/temp/L_sample.RData")
-load("C:/Users/Zoe/Desktop/temp/Y_sample.RData")
+load("U_list.RData")
+load("L_list.RData")
+load("Y_list.RData")
 
 # average function
 avg <- function(x, y){(0.5 * x) + (0.5 * y)}
 
 # reference for what delta F should be
-F_2011 <- U_sample_diag[[1]] %*% L_sample[[1]] %*% Y_sample[[1]]
-F_2012 <- U_sample_diag[[2]] %*% L_sample[[2]] %*% Y_sample[[2]]
-F_2013 <- U_sample_diag[[3]] %*% L_sample[[3]] %*% Y_sample[[3]]
-F_soll3 <- F_2013 - F_2012
-F_soll2 <- F_2012 - F_2011
+test2 <- (Y_list[[2]] / gdp[[2]])
+test2[!is.finite(test2)] <- 0
+F2_86 <- U_list[[1]] %*% L_list1[[1]] %*% (test * gdp[[1]])
+F2_87 <- U_list[[2]] %*% L_list1[[2]] %*% (test2 * gdp[[2]])
+F2_soll <- F2_87 - F2_86
 
-# function takes average of both polar decomposition forms and returns individual
+F_1986 <- U_list[[1]] %*% L_list1[[1]] %*% Y_list[[1]]
+F_1987 <- U_list[[2]] %*% L_list1[[2]] %*% Y_list[[2]]
+F_1988 <- U_list[[3]] %*% L_list1[[3]] %*% Y_list[[3]]
+F_soll8 <- F_1988 - F_1987
+F_soll7 <- F_1987 - F_1986
+F_soll <- list(F_soll7, F_soll8)
+save(F_soll, file = "F_soll.RData")
+
+load("F_soll.RData")
+
+# test function takes average of both polar decomposition forms and returns individual
 # contribution to the change of F for each variable as a list
-SDA <- function(U_1, U_0, L_1, L_0, Y_1, Y_0){
-  con_U <- avg(((U_1 - U_0) %*% L_1 %*% Y_1), 
-              ((U_1 - U_0) %*% L_0 %*% Y_0))
-  con_L <- avg((U_0 %*% (L_1 - L_0) %*% Y_1),   
-               (U_1 %*% (L_1 - L_0) %*% Y_0))
-  con_Y <- avg((U_0 %*% L_0 %*% (Y_1 - Y_0)),   
-               (U_1 %*% L_1 %*% (Y_1 - Y_0)))
-  delta_F <- con_U + con_L + con_Y 
+SDAt <- function(U1, U0, L1, L0, Y1, Y0){
+  con_U <- avg(((U1 - U0) %*% L1 %*% Y1), 
+              ((U1 - U0) %*% L0 %*% Y0))
+  con_L <- avg((U0 %*% (L1 - L0) %*% Y1),   
+               (U1 %*% (L1 - L0) %*% Y0))
+  con_Y <- avg((U0 %*% L0 %*% (Y1 - Y0)),   
+               (U1 %*% L1 %*% (Y1 - Y0)))
+  delta_F <- con_U + con_L + con_Y
   return(list(delta_F = delta_F, con_U = con_U, con_L = con_L, con_Y = con_Y))
 }
 
-# check function -> it works!
-F_fun <- SDA(U_sample_diag[[3]], U_sample_diag[[2]], 
-             L_sample[[3]], L_sample[[2]], 
-             Y_sample[[3]], Y_sample[[2]])
-all.equal(F_soll3, F_fun[["delta_F"]])
+# check test function -> it works!
+delta_Ft <- SDAt(U_list[[3]], U_list[[2]], 
+             L_list1[[3]], L_list1[[2]], 
+             Y_list[[3]], Y_list[[2]])
 
-# loop SDA function with list inputs
-loop <- list()
+all.equal(F_soll[[2]], delta_Ft[["delta_F"]])
+
+# test loop for SDA function with list inputs
+loopt <- list()
 for (i in 2:3){
-    loop[[i]] <- SDA(U_sample_diag[[i]], U_sample_diag[[(i-1)]], 
-                     L_sample[[i]], L_sample[[(i-1)]],
-                     Y_sample[[i]], Y_sample[[(i-1)]])
+    loopt[[i]] <- SDAt(U_list[[i]], U_list[[(i-1)]], 
+                     L_list1[[i]], L_list1[[(i-1)]],
+                     Y_list[[i]], Y_list[[(i-1)]])
 }
-all.equal(F_soll3, loop[[3]][["delta_F"]])
+all.equal(F_soll[[2]], loopt[[3]][["delta_F"]])
+
+load("U_list.RData")
+load("lpro_list.RData")
+load("lsup_list.RData")
+load("llev_list.RData")
+load("ypro_list.RData")
+load("ysup_list.RData")
+load("ylev_list.RData")
+load("G_list.RData")
+load("P_list.RData")
 
 # SDA function with decomposed inputs
-SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0, ypro1, ypro0, 
-                    ysup1, ysup0, ylev1, ylev0, G1, G0, P1, P0){
+SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0, 
+                    ypro1, ypro0, ysup1, ysup0, ylev1, ylev0, G1, G0, P1, P0){
   con_U <- avg((U1 - U0) %*% (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * P1), 
                (U1 - U0) %*% (lpro0 * lsup0 * llev0) %*% (ypro0 * ysup0 * ylev0 * G0 * P0))
   con_lpro <- avg(U0 %*% ((lpro1 - lpro0) * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * P1), 
@@ -74,19 +94,34 @@ SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0, ypro1, ypr
                U1 %*% (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * (P1 - P0)))
   delta_F <- con_U + con_lpro + con_lsup + con_llev + con_ypro + con_ysup + 
              con_ylev + con_G + con_P
-  return(list(delta_F, con_U, con_lpro, con_lsup, con_llev, con_ypro, con_ysup, 
-              con_ylev, con_G, con_P))
+  return(list(delta_F = delta_F, con_U = con_U, con_lpro = con_lpro, 
+              con_lsup = con_lsup, con_llev = con_llev, con_ypro = con_ypro, 
+              con_ysup = con_ysup, con_ylev = con_ylev, con_G = con_G, con_P = con_P))
 }
 
-loop_dec <- list()
-for (i in 2:28){
-    loop_dec[[i]] <- SDA_dec(U_list[[i]], U_list[[i-1]], 
-                             lpro[[i]], lpro[[i-1]], 
-                             lsup[[i]], lsup[[i-1]],
-                             llev[[i]], llev[[i-1]],
-                             ypro[[i]], ypro[[i-1]],
-                             ysup[[i]], ysup[[i-1]],
-                             ylev[[i]], ylev[[i-1]], 
-                             G[[i]], G[[i-1]],
-                             P[[i]], P[[i-1]])
+#  function works, but is not exact due to replaced Inf values in decomposed variables
+test_dec <- SDA_dec(U_list[[2]], U_list[[1]], 
+                lpro[[2]], lpro[[1]], 
+                lsup[[2]], lsup[[1]],
+                llev[[2]], llev[[1]],
+                ypro[[2]], ypro[[1]],
+                ysup[[2]], ysup[[1]],
+                ylev[[2]], ylev[[1]], 
+                G[[2]], G[[1]],
+                P[[2]], P[[1]])
+
+save(test_dec, file = "test_dec.RData")
+
+# loop SDA with decomposed variables
+loop_dec1 <- list()
+for (i in 2:3){
+    loop_dec1[[i]] <- SDA_dec(U_list[[i]], U_list[[(i-1)]], 
+                             lpro[[i]], lpro[[(i-1)]], 
+                             lsup[[i]], lsup[[(i-1)]],
+                             llev[[i]], llev[[(i-1)]],
+                             ypro[[i]], ypro[[(i-1)]],
+                             ysup[[i]], ysup[[(i-1)]],
+                             ylev[[i]], ylev[[(i-1)]], 
+                             G[[i]], G[[(i-1)]],
+                             P[[i]], P[[(i-1)]])
 }
