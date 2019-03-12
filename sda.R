@@ -16,12 +16,6 @@ load("Y_list.RData")
 avg <- function(x, y){(0.5 * x) + (0.5 * y)}
 
 # reference for what delta F should be
-test2 <- (Y_list[[2]] / gdp[[2]])
-test2[!is.finite(test2)] <- 0
-F2_86 <- U_list[[1]] %*% L_list1[[1]] %*% (test * gdp[[1]])
-F2_87 <- U_list[[2]] %*% L_list1[[2]] %*% (test2 * gdp[[2]])
-F2_soll <- F2_87 - F2_86
-
 F_1986 <- U_list[[1]] %*% L_list1[[1]] %*% Y_list[[1]]
 F_1987 <- U_list[[2]] %*% L_list1[[2]] %*% Y_list[[2]]
 F_1988 <- U_list[[3]] %*% L_list1[[3]] %*% Y_list[[3]]
@@ -61,15 +55,26 @@ for (i in 2:3){
 }
 all.equal(F_soll[[2]], loopt[[3]][["delta_F"]])
 
+rm(L_list, ljrs); gc()
+a <- 7:9
+source("L_variables.R")
 load("U_list.RData")
+U_list <- U_list[a]
 load("lpro_list.RData")
 load("lsup_list.RData")
 load("llev_list.RData")
 load("ypro_list.RData")
+ypro <- ypro[a]
 load("ysup_list.RData")
+ysup <- ysup[a]
 load("ylev_list.RData")
+ylev <- ylev[a]
 load("G_list.RData")
+G <- G[a]
 load("P_list.RData")
+P <- P[a]
+
+avg <- function(x, y){(0.5 * x) + (0.5 * y)}
 
 # SDA function with decomposed inputs
 SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0, 
@@ -99,23 +104,10 @@ SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0,
               con_ysup = con_ysup, con_ylev = con_ylev, con_G = con_G, con_P = con_P))
 }
 
-#  function works, but is not exact due to replaced Inf values in decomposed variables
-test_dec <- SDA_dec(U_list[[2]], U_list[[1]], 
-                lpro[[2]], lpro[[1]], 
-                lsup[[2]], lsup[[1]],
-                llev[[2]], llev[[1]],
-                ypro[[2]], ypro[[1]],
-                ysup[[2]], ysup[[1]],
-                ylev[[2]], ylev[[1]], 
-                G[[2]], G[[1]],
-                P[[2]], P[[1]])
-
-save(test_dec, file = "test_dec.RData")
-
 # loop SDA with decomposed variables
-loop_dec1 <- list()
+loop4 <- list()
 for (i in 2:3){
-    loop_dec1[[i]] <- SDA_dec(U_list[[i]], U_list[[(i-1)]], 
+    loop4[[i]] <- SDA_dec(U_list[[i]], U_list[[(i-1)]], 
                              lpro[[i]], lpro[[(i-1)]], 
                              lsup[[i]], lsup[[(i-1)]],
                              llev[[i]], llev[[(i-1)]],
@@ -125,3 +117,4 @@ for (i in 2:3){
                              G[[i]], G[[(i-1)]],
                              P[[i]], P[[(i-1)]])
 }
+save(loop4, file = "loop4.RData")
