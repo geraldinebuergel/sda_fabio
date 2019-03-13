@@ -55,14 +55,14 @@ for (i in 2:3){
 }
 all.equal(F_soll[[2]], loopt[[3]][["delta_F"]])
 
-rm(L_list, ljrs); gc()
-a <- 7:9
+rm(list = ls()); gc()
+a <- 27:28
 source("L_variables.R")
 load("U_list.RData")
 U_list <- U_list[a]
-load("lpro_list.RData")
-load("lsup_list.RData")
-load("llev_list.RData")
+#load("lpro_list.RData")
+#load("lsup_list.RData")
+#load("llev_list.RData")
 load("ypro_list.RData")
 ypro <- ypro[a]
 load("ysup_list.RData")
@@ -105,9 +105,9 @@ SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0,
 }
 
 # loop SDA with decomposed variables
-loop4 <- list()
+loop <- list()
 for (i in 2:3){
-  loop4[[i]] <- SDA_dec(U_list[[i]], U_list[[(i-1)]], 
+  loop[[i]] <- SDA_dec(U_list[[i]], U_list[[(i-1)]], 
                         lpro[[i]], lpro[[(i-1)]], 
                         lsup[[i]], lsup[[(i-1)]],
                         llev[[i]], llev[[(i-1)]],
@@ -117,4 +117,4 @@ for (i in 2:3){
                         G[[i]], G[[(i-1)]],
                         P[[i]], P[[(i-1)]])
 }
-save(loop4, file = "loop4.RData")
+save(loop, file = "loop.RData")

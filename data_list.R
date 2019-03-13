@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 library(tidyverse)
 
 rm(list = ls()); gc()
