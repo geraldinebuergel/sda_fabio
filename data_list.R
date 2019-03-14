@@ -28,7 +28,7 @@ for (i in seq_along(1:length(X_list))){
   X_list2[[i]] <- X_list[[i]][["X"]]
 }
 
-# calculate U and replace NaN values with zero
+# calculate U and replace NaN and Inf values with zero
 U_list <- map2(E_landuse, X_list2, ~.x / .y) %>% 
   rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list") %>% 
   map(~.x[-c(24701:24960)])
@@ -39,22 +39,15 @@ save(U_list, file = "U_list.RData")
 # load L files
 L_list <- list.files(path = fabio, pattern = "*_L.RData")
 
-# subset for 1986 - 2000
-L_list1 <- L_list[1:3] %>% 
-  map(~ mget(load(paste0(fabio,.x)))) %>%
-  lapply(as.data.frame) %>% 
-  map(~.x[1:24700, 1:24700]) %>% 
-  lapply(as.matrix)
-
-# subset for 2000 - 2013
-L_list2 <- L_list[15:28] %>% 
+# subset L for 3 years at a time
+L_list <- L_list[5:7] %>% 
   map(~ mget(load(paste0(fabio,.x)))) %>%
   lapply(as.data.frame) %>% 
   map(~.x[1:24700, 1:24700]) %>% 
   lapply(as.matrix)
 
 # save L
-save(L_list1, file = "L_list.RData")
+#save(L_list, file = "L_list.RData")
 
 # load Y files and subset food columns
 Y_list <-  list.files(path = fabio, pattern = "*_Y.RData") %>% 
