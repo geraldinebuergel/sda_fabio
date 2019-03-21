@@ -28,6 +28,7 @@ save(results, file = "results_list.RData")
 # turn list into appropriate tibble
 #----------------------------------------
 
+# ISO codes----------------------------
 ISO <- c("ARM","AFG","ALB","DZA","AGO","ATG","ARG","AUS","AUT","BHS",
                    "BHR","BRB","BLX","BGD","BOL","BWA","BRA","BLZ","SLB","BRN",
                    "BGR","MMR","BDI","CMR","CAN","CPV","CAF","LKA","TCD","CHL",
@@ -48,7 +49,7 @@ ISO <- c("ARM","AFG","ALB","DZA","AGO","ATG","ARG","AUS","AUT","BHS",
                    "SUN","GBR","UKR","USA","BFA","URY","UZB","VEN","VNM","ETH",
                    "WSM","YUG","YEM","COD","ZMB","BEL","LUX","SRB","MNE","SDN"
 )
-
+#country codes ----------------------------------------
 country <- c("Armenia",
              "Afghanistan",
              "Albania",
@@ -240,6 +241,8 @@ country <- c("Armenia",
              "Montenegro",
              "Sudan"
 )
+
+# assemble tibble--------------------------
 
 # function isolates variables and converts them into a vector
 vec_list <- function(x){
