@@ -1,5 +1,6 @@
 library(tidyverse)
 library(xtable)
+library(tikzDevice)
 
 rm(list = ls()); gc()
 
@@ -20,6 +21,32 @@ results_long$share[is.na(results_long$share)] <- 0
 #---------------------------------------------------------
 # VISUAL ANALYSIS
 #---------------------------------------------------------
+
+# results_long %>% 
+#   ggplot(aes(x = value)) +
+#   geom_density() +
+#   facet_wrap(~ contribution)
+
+results_long %>% 
+  ggplot(aes(x = contribution, y = value)) +
+  geom_boxplot()
+
+# results_long %>% 
+#   ggplot(aes(x = share)) +
+#     geom_density() +
+#     facet_wrap(~ contribution)
+
+results_long %>% 
+  ggplot(aes(x = contribution, y = share)) +
+  geom_boxplot()
+
+# tikz('plot1.tex',width=3.5, height=3)
+# 
+# plot1
+# 
+# dev.off()
+# tikzTest()
+# tikzTest("con_G")
 
 # delta F according to contributions of variables
 results_long %>%
@@ -46,66 +73,131 @@ results_long %>%
 # STATISTICAL ANALYSIS
 #--------------------------------------------------------
 
-# function to determine indicators
-indi <- function(x){
-    list(mean = mean(x), 
-         max = max(x),
-         min = min(x),
-         sd = sd(x))
-}
-
-# select columns with result values
-results_values <- results %>%
-  select(delta_F:con_P)
-
-# function isolates variables and converts them into a vector
-vec_list <- function(x){
-  map(res_indi_list, x) %>% 
-    unlist() %>%
-    matrix() %>% 
-    as.vector()
-}
-
-# create summary tibble
-res_indi_list <- map(results_values, indi)
-res_indi_tbl <- tibble(mean = vec_list("mean"),
-                       sd = vec_list("sd"),
-                       min = vec_list("min"),
-                       max = vec_list("max"))
-rownames(res_indi_tbl) <- c("delta_F", "con_U", "con_lpro", "con_lsup", "con_llev",
-                            "con_ypro", "con_ysup", "con_ylev", "con_G", "con_P")
-                       
-# make latex table
-xtable(res_indi_tbl)
-
-results %>% 
-  group_by(country, ISO) %>% 
-  summarize(mean = mean(delta_F), 
-            max = max(delta_F),
-            min = min(delta_F),
-            sd = sd(delta_F)) %>%
-  arrange(mean)
-
-results %>% 
-  group_by(country, ISO) %>% 
-  summarize(mean = mean(con_P), 
-            max = max(con_P),
-            min = min(con_P),
-            sd = sd(con_P)) %>% 
-  arrange(desc(mean))
-
-results %>% 
-  group_by(country, ISO) %>% 
-  summarize(mean = mean(con_G), 
-            max = max(con_G),
-            min = min(con_G),
-            sd = sd(con_G)) %>% 
-  arrange(desc(mean))
-
-results_long %>% 
+# general summary per variabel
+a1 <- results_long %>% 
   group_by(contribution) %>% 
+  summarize(mean = mean(value),
+            sd = sd(value),
+            min = min(value),
+            max = max(value)) %>% 
+  arrange(desc(mean))
+
+# export for latex
+print(xtable(a1), include.rownames=FALSE)
+
+# arrange for different indicators
+a2 <- arrange(a1, desc(sd))
+a3 <- arrange(a1, desc(min))
+a4 <- arrange(a1, desc(max))
+
+b1 <- results_long %>% 
+  group_by(contribution) %>% 
+  summarize(mean = mean(share),
+            sd = sd(share),
+            min = min(share),
+            max = max(share)) %>% 
+  arrange(desc(mean))
+b2 <- arrange(b1, desc(sd))
+b3 <- arrange(b1, desc(min))
+b4 <- arrange(b1, desc(max))
+
+# years
+c1 <- results_long %>% 
+  group_by(year) %>% 
+  summarize(mean_F = mean(delta_F)) %>% 
+  arrange(desc(mean_F))
+
+c2 <- results_long %>% 
+  group_by(year, contribution) %>% 
+  summarize(mean = mean(value),
+            sd = sd(value),
+            min = min(value),
+            max = max(value)) %>% 
+  arrange(desc(mean))
+
+c3 <- results_long %>% 
+  group_by(year, contribution) %>% 
+  summarize(mean = mean(share),
+            sd = sd(share),
+            min = min(share),
+            max = max(share)) %>% 
+  arrange(desc(mean))
+
+# separate pos & neg values
+d1 <- results_long %>% 
+  filter(value > 0) %>% 
+  group_by(contribution) %>% 
+  summarize(mean = mean(value),
+            sd = sd(value),
+            min = min(value),
+            max = max(value)) %>% 
+  arrange(desc(mean))
+d2 <- arrange(d1, desc(sd))
+
+d3 <- results_long %>% 
+  filter(value < 0) %>% 
+  group_by(contribution) %>% 
+  summarize(mean = mean(value),
+            sd = sd(value),
+            min = min(value),
+            max = max(value)) %>% 
+  arrange(mean)
+d4 <- arrange(d3, sd)
+
+# countries
+e1 <- results_long %>% 
+  group_by(country, ISO, contribution) %>% 
+  summarize(mean = mean(value),
+            sd = sd(value),
+            min = min(value),
+            max = max(value)) %>% 
+  arrange(desc(mean))
+
+e2 <- results_long %>% 
+  group_by(country, ISO, contribution) %>% 
   summarize(mean = mean(share),
             sd = sd(share),
             max = max(share),
             min = min(share)) %>% 
   arrange(desc(mean))
+
+e3 <- results_long %>% 
+  group_by(country, ISO) %>% 
+  summarize(mean = mean(delta_F),
+            sd = sd(delta_F),
+            max = max(delta_F),
+            min = min(delta_F)) %>% 
+  arrange(sd)
+
+# finde large outliers
+f1 <- results_long %>% 
+  group_by(contribution, country, ISO) %>% 
+  filter (contribution == "con_ypro") %>% 
+  summarize(max = max(value)) %>% 
+  arrange(desc(max))
+
+f2 <- results_long %>% 
+  group_by(contribution, country, ISO) %>% 
+  filter (contribution == "con_ypro") %>% 
+  summarize(min = min(value)) %>% 
+  arrange(desc(min))
+
+# solve overplotting
+library(hexbin)
+results_long %>% 
+  ggplot(aes(x = contribution, y = share)) +
+  stat_bin_hex(colour="white", na.rm=TRUE) +
+  scale_fill_gradientn(colours=c("blue","orange"), 
+                       name = "Frequency", 
+                       na.value=NA)
+
+results_long %>% 
+  ggplot(aes(x = contribution, y = share)) +
+  geom_boxplot(col = "blue") +
+  geom_jitter()
+
+results_long %>% 
+  filter(contribution == "con_U") %>% 
+  ggplot(aes(x = contribution, y = share)) +
+  geom_boxplot(col = "red") +
+  geom_jitter()
