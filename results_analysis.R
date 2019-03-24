@@ -1,6 +1,6 @@
 library(tidyverse)
 library(xtable)
-library(tikzDevice)
+library(hexbin)
 
 rm(list = ls()); gc()
 
@@ -22,7 +22,7 @@ results_long$share[is.na(results_long$share)] <- 0
 # VISUAL ANALYSIS
 #---------------------------------------------------------
 
-# results_long %>% 
+# results_long %>%
 #   ggplot(aes(x = value)) +
 #   geom_density() +
 #   facet_wrap(~ contribution)
@@ -31,7 +31,7 @@ results_long %>%
   ggplot(aes(x = contribution, y = value)) +
   geom_boxplot()
 
-# results_long %>% 
+# results_long %>%
 #   ggplot(aes(x = share)) +
 #     geom_density() +
 #     facet_wrap(~ contribution)
@@ -40,34 +40,51 @@ results_long %>%
   ggplot(aes(x = contribution, y = share)) +
   geom_boxplot()
 
-# tikz('plot1.tex',width=3.5, height=3)
-# 
-# plot1
-# 
-# dev.off()
-# tikzTest()
-# tikzTest("con_G")
+# save as pdf to import into latex
+#tikz('plot1.tex',width=3.5, height=3)
+pdf("all_value.pdf", height = 6, width = 6)
+all_value
+dev.off()
 
 # delta F according to contributions of variables
 results_long %>%
-  filter(ISO == "USA") %>%
   ggplot(aes(x = year, y = share, fill = contribution)) +
     geom_col()
 
-AUT <- results_long %>%
-  filter(ISO == "AUT") #%>%
-  qplot(year, delta_F, data = AUT, geom = "col")
-
 results_long %>% 
-  filter(ISO == c("USA", "DEU", "CHN", "RUS")) %>% 
+  filter(ISO == c("USA", "JPN", "AUT")) %>% 
   ggplot(aes(year, share, fill = contribution)) +
-    geom_col() +
+    geom_col(position = "fill") +
     facet_grid(~ ISO)
 
-results_long %>%
-  ggplot(aes(x = year, y = delta_F, fill = share)) +
-  geom_col() +
-  facet_wrap(~ ISO)
+results_long %>% 
+  filter(ISO == "CHN") %>% 
+  ggplot(aes(year, share, fill = contribution)) +
+  geom_col(position = "fill")
+
+test <- results_long %>% 
+  filter(ISO == "CHN") %>% 
+  group_by(year, delta_F) %>% 
+  summarize(sum = sum(value))
+
+# solve overplotting
+results_long %>% 
+  ggplot(aes(x = contribution, y = share)) + # value gets you a very orange picture
+  stat_bin_hex(colour="white", na.rm=TRUE) +
+  scale_fill_gradientn(colours=c("blue","orange"), 
+                       name = "Frequency", 
+                       na.value=NA)
+
+results_long %>% 
+  ggplot(aes(x = contribution, y = share)) +
+  geom_boxplot(col = "blue") +
+  geom_jitter()
+
+results_long %>% 
+  filter(contribution == "con_llev") %>% 
+  ggplot(aes(x = contribution, y = share)) +
+  geom_boxplot(col = "red") +
+  geom_jitter()
 
 #--------------------------------------------------------
 # STATISTICAL ANALYSIS
@@ -97,6 +114,9 @@ b1 <- results_long %>%
             min = min(share),
             max = max(share)) %>% 
   arrange(desc(mean))
+b11 <- b1[ , c("mean":"max")]*10  
+print(xtable(b1), include.rownames=FALSE)
+
 b2 <- arrange(b1, desc(sd))
 b3 <- arrange(b1, desc(min))
 b4 <- arrange(b1, desc(max))
@@ -125,22 +145,22 @@ c3 <- results_long %>%
 
 # separate pos & neg values
 d1 <- results_long %>% 
-  filter(value > 0) %>% 
+  filter(share > 0) %>% 
   group_by(contribution) %>% 
-  summarize(mean = mean(value),
-            sd = sd(value),
-            min = min(value),
-            max = max(value)) %>% 
+  summarize(mean = mean(share),
+            sd = sd(share),
+            min = min(share),
+            max = max(share)) %>% 
   arrange(desc(mean))
 d2 <- arrange(d1, desc(sd))
 
 d3 <- results_long %>% 
-  filter(value < 0) %>% 
+  filter(share < 0) %>% 
   group_by(contribution) %>% 
-  summarize(mean = mean(value),
-            sd = sd(value),
-            min = min(value),
-            max = max(value)) %>% 
+  summarize(mean = mean(share),
+            sd = sd(share),
+            min = min(share),
+            max = max(share)) %>% 
   arrange(mean)
 d4 <- arrange(d3, sd)
 
@@ -182,22 +202,15 @@ f2 <- results_long %>%
   summarize(min = min(value)) %>% 
   arrange(desc(min))
 
-# solve overplotting
-library(hexbin)
-results_long %>% 
-  ggplot(aes(x = contribution, y = share)) +
-  stat_bin_hex(colour="white", na.rm=TRUE) +
-  scale_fill_gradientn(colours=c("blue","orange"), 
-                       name = "Frequency", 
-                       na.value=NA)
+f3 <- results_long %>% 
+  group_by(country, ISO, year, contribution) %>% 
+  summarize(max = max(share)) %>% 
+  arrange(max)
 
-results_long %>% 
-  ggplot(aes(x = contribution, y = share)) +
-  geom_boxplot(col = "blue") +
-  geom_jitter()
-
-results_long %>% 
-  filter(contribution == "con_U") %>% 
-  ggplot(aes(x = contribution, y = share)) +
-  geom_boxplot(col = "red") +
-  geom_jitter()
+# population
+g1 <- results_long %>% 
+  filter(contribution == "con_P") %>% 
+  group_by(country, ISO) %>% 
+  summarize(mean = mean(share),
+            sd = sd(share)) %>% 
+  arrange(desc(mean))
