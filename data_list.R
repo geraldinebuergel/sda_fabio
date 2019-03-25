@@ -40,7 +40,7 @@ save(U_list, file = "U_list.RData")
 L_list <- list.files(path = fabio, pattern = "*_L.RData")
 
 # subset L for 3 years at a time
-L_list <- L_list[5:7] %>% 
+L_list <- L_list[26] %>% 
   map(~ mget(load(paste0(fabio,.x)))) %>%
   lapply(as.data.frame) %>% 
   map(~.x[1:24700, 1:24700]) %>% 

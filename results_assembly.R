@@ -49,6 +49,8 @@ ISO <- c("ARM","AFG","ALB","DZA","AGO","ATG","ARG","AUS","AUT","BHS",
                    "SUN","GBR","UKR","USA","BFA","URY","UZB","VEN","VNM","ETH",
                    "WSM","YUG","YEM","COD","ZMB","BEL","LUX","SRB","MNE","SDN"
 )
+save(ISO, file = "fabio_ISO.RData")
+
 #country codes ----------------------------------------
 country <- c("Armenia",
              "Afghanistan",

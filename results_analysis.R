@@ -48,13 +48,18 @@ dev.off()
 
 # delta F according to contributions of variables
 results_long %>%
-  ggplot(aes(x = year, y = share, fill = contribution)) +
+  ggplot(aes(x = year, y = value, fill = contribution)) +
     geom_col()
+
+results_long %>% 
+  filter(year != c(2011, 2012)) %>% 
+  ggplot(aes(year, delta_F)) +
+  geom_col()
 
 results_long %>% 
   filter(ISO == c("USA", "JPN", "AUT")) %>% 
   ggplot(aes(year, share, fill = contribution)) +
-    geom_col(position = "fill") +
+    geom_col(position = "stack") +
     facet_grid(~ ISO)
 
 results_long %>% 
@@ -62,27 +67,22 @@ results_long %>%
   ggplot(aes(year, share, fill = contribution)) +
   geom_col(position = "fill")
 
-test <- results_long %>% 
-  filter(ISO == "CHN") %>% 
-  group_by(year, delta_F) %>% 
-  summarize(sum = sum(value))
-
 # solve overplotting
 results_long %>% 
-  ggplot(aes(x = contribution, y = share)) + # value gets you a very orange picture
+  ggplot(aes(x = contribution, y = value)) + # value gets you a very orange picture
   stat_bin_hex(colour="white", na.rm=TRUE) +
   scale_fill_gradientn(colours=c("blue","orange"), 
                        name = "Frequency", 
                        na.value=NA)
 
 results_long %>% 
-  ggplot(aes(x = contribution, y = share)) +
+  ggplot(aes(x = contribution, y = value)) +
   geom_boxplot(col = "blue") +
   geom_jitter()
 
 results_long %>% 
   filter(contribution == "con_llev") %>% 
-  ggplot(aes(x = contribution, y = share)) +
+  ggplot(aes(x = contribution, y = value)) +
   geom_boxplot(col = "red") +
   geom_jitter()
 
@@ -214,3 +214,8 @@ g1 <- results_long %>%
   summarize(mean = mean(share),
             sd = sd(share)) %>% 
   arrange(desc(mean))
+
+gh <- results %>%
+  group_by(year) %>% 
+  summarize(sum = sum(delta_F))
+  
