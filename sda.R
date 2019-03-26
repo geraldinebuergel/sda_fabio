@@ -16,15 +16,24 @@ load("Y_list.RData")
 avg <- function(x, y){(0.5 * x) + (0.5 * y)}
 
 # reference for what delta F should be
-F_1996 <- U_list[[1]] %*% L_list[[1]] %*% Y_list[[1]]
-F_1997 <- U_list[[2]] %*% L_list[[2]] %*% Y_list[[2]]
+F_1986 <- U_list[[1]] %*% L_list[[1]] %*% Y_list[[1]]
+F_1987 <- U_list[[2]] %*% L_list[[2]] %*% Y_list[[2]]
 F_1988 <- U_list[[3]] %*% L_list[[3]] %*% Y_list[[3]]
-F_soll8 <- F_1998 - F_1997
-F_soll7 <- F_1987 - F_1986
+F_soll8 <- sum(F_1988) - sum(F_1987)
+F_soll7 <- sum(F_1987) - sum(F_1986)
 F_soll <- list(F_soll7, F_soll8)
+names(F_soll) <- c(1987, 1988, 2012, 2013)
 save(F_soll, file = "F_soll.RData")
 
-load("F_soll.RData")
+F_2011 <- U_list[[26]] %*% L_list[[1]] %*% Y_list[[26]]
+F_2012 <- U_list[[27]] %*% L_list[[2]] %*% Y_list[[27]]
+F_2013 <- U_list[[28]] %*% L_list[[3]] %*% Y_list[[28]]
+F_soll3 <- sum(F_2013) - sum(F_2012)
+F_soll2 <- sum(F_2012) - sum(F_2011)
+F_soll[[3]] <- F_soll2
+F_soll[[4]] <- F_soll3
+
+#load("F_soll.RData")
 
 # test function takes average of both polar decomposition forms and returns individual
 # contribution to the change of F for each variable as a list

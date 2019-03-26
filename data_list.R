@@ -20,6 +20,8 @@ for (i in seq_along(1:length(E_list))){
   E_landuse[[i]] <- E_list[[i]][["Landuse"]]
 }
 
+save(E_landuse, file = "landuse.RData")
+
 # load X files
 X_list <-  list.files(path = fabio, pattern = "*_X.rds") %>% 
   map(~ readRDS(paste0(fabio,.x)))
@@ -36,7 +38,7 @@ save(U_list, file = "U_list.RData")
 L_list <- list.files(path = fabio, pattern = "*_L.rds")
 
 # subset L for 3 years at a time
-L_list <- L_list[3:6] %>% 
+L_list <- L_list[26:28] %>% 
   map(~ readRDS(paste0(fabio,.x))) %>%
   lapply(as.data.frame) %>% 
   map(~.x[1:22800, 1:22800]) %>% 

@@ -210,7 +210,30 @@ g1 <- results_long %>%
             sd = sd(share)) %>% 
   arrange(desc(mean))
 
+#------------------------------------
+# check if results make sense
+#------------------------------------
+
 F_sum <- results %>%
   group_by(year) %>% 
   summarize(sum = sum(delta_F))
-  
+
+load("landuse.RData")
+E1 <- map(E_landuse, ~.x[1:22800])
+E2 <- lapply(E1, sum)
+E3 <- list()
+for (i in 2:length(E2)){
+  E3[[i]] <- E2[[i]] - E2[[i-1]]
+}
+
+load("results_tbl_old.RData")
+F_sum_old <- results_old %>% 
+  group_by(year) %>% 
+  summarize(sum_old = sum(delta_F))
+
+compare_delta_F <- tibble(year = c(1987:2013),
+             delta_landuse = unlist(E3[2:28]),
+             delta_F = F_sum["sum"],
+             delta_F_old = F_sum_old["sum_old"])
+save(compare_delta_F, file = "compare_delta_F.RData")
+
