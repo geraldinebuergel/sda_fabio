@@ -60,3 +60,16 @@ gdp <- gdp1[, 2:5] %>%
   map(~.x[["Value"]])
 
 save(gdp, file = "GDP.RData")
+
+#-------------------------------------------------
+# hybrid
+#-------------------------------------------------
+
+gdp1 <- read_xlsx("C:/Users/Zoe/Dropbox/Master Arbeit/excel/hybrid_GDP.xlsx") %>% 
+  dplyr::select(c("year", "value"))
+
+gdp <- split_tibble(pop1, "year") %>% 
+  map(dplyr::select, "value") %>% 
+  lapply(as.matrix)
+
+save(gdp, file = "GDP_hybrid.RData")

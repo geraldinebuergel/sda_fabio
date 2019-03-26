@@ -28,3 +28,16 @@ pop <- split_tibble(pop1, 'Jahr') %>%
 
 # save as .RData file
 save(pop, file = "Population.RData")
+
+#-------------------------------------------------
+# hybrid
+#-------------------------------------------------
+
+pop1 <- read_xlsx("C:/Users/Zoe/Dropbox/Master Arbeit/excel/hybrid_Population.xlsx") %>% 
+  dplyr::select(c("year", "value"))
+
+pop <- split_tibble(pop1, "year") %>% 
+  map(dplyr::select, "value") %>% 
+  lapply(as.matrix)
+
+save(pop, file = "Population_hybrid.RData")
