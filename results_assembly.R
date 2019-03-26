@@ -10,17 +10,17 @@ loop_list <- list.files(pattern = "loop") %>%
   map(~ mget(load(paste0(.x))))
 
 results <- list()
-for(i in 1:14){
+for(i in 1:13){
   results[[i]] <- list(loop_list[[i]][[1]][[2]], loop_list[[i]][[1]][[3]])
 }
-results[[14]] <- loop_list[[14]]
 
-results <- lapply(results, unlist, recursive = FALSE) %>% 
-  unlist(recursive = FALSE) %>% 
-  split(rep(1:27, each = 10))
+results <- lapply(results, unlist, recursive = FALSE)
+results[[14]] <- loop_list[[14]][[1]][[2]]
+results <- unlist(results, recursive = FALSE)
+results <- split(results, rep(1:27, each = 10))
 
 names(results) <- c(1987:2013)
-names(results[[27]]) <- c("delta_F", "con_U", "con_lpro", "con_lsup", "con_llev",
+#names(results[[27]]) <- c("delta_F", "con_U", "con_lpro", "con_lsup", "con_llev",
                           "con_ypro", "con_ysup", "con_ylev", "con_G", "con_P")
 save(results, file = "results_list.RData")
 
@@ -49,7 +49,7 @@ ISO <- c("ARM","AFG","ALB","DZA","AGO","ATG","ARG","AUS","AUT","BHS",
                    "SUN","GBR","UKR","USA","BFA","URY","UZB","VEN","VNM","ETH",
                    "WSM","YUG","YEM","COD","ZMB","BEL","LUX","SRB","MNE","SDN"
 )
-save(ISO, file = "fabio_ISO.RData")
+#save(ISO, file = "fabio_ISO.RData")
 
 #country codes ----------------------------------------
 country <- c("Armenia",

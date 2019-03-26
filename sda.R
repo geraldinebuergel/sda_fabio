@@ -16,10 +16,10 @@ load("Y_list.RData")
 avg <- function(x, y){(0.5 * x) + (0.5 * y)}
 
 # reference for what delta F should be
-F_1986 <- U_list[[1]] %*% L_list1[[1]] %*% Y_list[[1]]
-F_1987 <- U_list[[2]] %*% L_list1[[2]] %*% Y_list[[2]]
-F_1988 <- U_list[[3]] %*% L_list1[[3]] %*% Y_list[[3]]
-F_soll8 <- F_1988 - F_1987
+F_1996 <- U_list[[1]] %*% L_list[[1]] %*% Y_list[[1]]
+F_1997 <- U_list[[2]] %*% L_list[[2]] %*% Y_list[[2]]
+F_1988 <- U_list[[3]] %*% L_list[[3]] %*% Y_list[[3]]
+F_soll8 <- F_1998 - F_1997
 F_soll7 <- F_1987 - F_1986
 F_soll <- list(F_soll7, F_soll8)
 save(F_soll, file = "F_soll.RData")
@@ -57,12 +57,9 @@ all.equal(F_soll[[2]], loopt[[3]][["delta_F"]])
 
 rm(list = ls()); gc()
 a <- 27:28
-source("L_variables.R")
+source("L_helper.R")
 load("U_list.RData")
 U_list <- U_list[a]
-#load("lpro_list.RData")
-#load("lsup_list.RData")
-#load("llev_list.RData")
 load("ypro_list.RData")
 ypro <- ypro[a]
 load("ysup_list.RData")
@@ -105,9 +102,9 @@ SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0,
 }
 
 # loop SDA with decomposed variables
-loop <- list()
+loop14 <- list()
 for (i in 2:3){
-  loop[[i]] <- SDA_dec(U_list[[i]], U_list[[(i-1)]], 
+  loop14[[i]] <- SDA_dec(U_list[[i]], U_list[[(i-1)]], 
                         lpro[[i]], lpro[[(i-1)]], 
                         lsup[[i]], lsup[[(i-1)]],
                         llev[[i]], llev[[(i-1)]],
@@ -117,4 +114,4 @@ for (i in 2:3){
                         G[[i]], G[[(i-1)]],
                         P[[i]], P[[(i-1)]])
 }
-save(loop, file = "loop.RData")
+save(loop14, file = "loop14.RData")

@@ -13,49 +13,45 @@ mount_wu_share()
 fabio <- "/mnt/nfs_fineprint/tmp/fabio/"
 
 # load E files and subset landuse columns
-E_list <-  list.files(path = fabio, pattern = "*_E.RData") %>% 
-  map(~ mget(load(paste0(fabio,.x))))
+E_list <-  list.files(path = fabio, pattern = "*_E.rds") %>% 
+  map(~ readRDS(paste0(fabio,.x)))
 E_landuse <- list()
 for (i in seq_along(1:length(E_list))){
-  E_landuse[[i]] <- E_list[[i]][["E"]][["Landuse"]]
+  E_landuse[[i]] <- E_list[[i]][["Landuse"]]
 }
 
 # load X files
-X_list <-  list.files(path = fabio, pattern = "*_X.RData") %>% 
-  map(~ mget(load(paste0(fabio,.x))))
-X_list2 <- list()
-for (i in seq_along(1:length(X_list))){
-  X_list2[[i]] <- X_list[[i]][["X"]]
-}
+X_list <-  list.files(path = fabio, pattern = "*_X.rds") %>% 
+  map(~ readRDS(paste0(fabio,.x)))
 
 # calculate U and replace NaN and Inf values with zero
-U_list <- map2(E_landuse, X_list2, ~.x / .y) %>% 
+U_list <- map2(E_landuse, X_list, ~.x / .y) %>% 
   rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list") %>% 
-  map(~.x[-c(24701:24960)])
+  map(~.x[-c(22801:23040)])
 
 # save U 
 save(U_list, file = "U_list.RData")
 
 # load L files
-L_list <- list.files(path = fabio, pattern = "*_L.RData")
+L_list <- list.files(path = fabio, pattern = "*_L.rds")
 
 # subset L for 3 years at a time
-L_list <- L_list[26] %>% 
-  map(~ mget(load(paste0(fabio,.x)))) %>%
+L_list <- L_list[3:6] %>% 
+  map(~ readRDS(paste0(fabio,.x))) %>%
   lapply(as.data.frame) %>% 
-  map(~.x[1:24700, 1:24700]) %>% 
+  map(~.x[1:22800, 1:22800]) %>% 
   lapply(as.matrix)
 
 # save L
-#save(L_list, file = "L_list.RData")
+save(L_list, file = "L_list.RData")
 
 # load Y files and subset food columns
-Y_list <-  list.files(path = fabio, pattern = "*_Y.RData") %>% 
-  map(~ mget(load(paste0(fabio,.x)))) %>% 
+Y_list <-  list.files(path = fabio, pattern = "*_Y.rds") %>% 
+  map(~ readRDS(paste0(fabio,.x))) %>% 
   lapply(as.data.frame) %>% 
   lapply(dplyr::select, contains("Food")) %>% 
   lapply(as.matrix) %>% 
-  map(~.x[-c(24701:24960), -c(191, 192)])
+  map(~.x[-c(22801:23040), -c(191, 192)])
 
 # save Y
 save(Y_list, file = "Y_list.RData")

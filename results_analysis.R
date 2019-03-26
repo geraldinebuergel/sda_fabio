@@ -52,11 +52,6 @@ results_long %>%
     geom_col()
 
 results_long %>% 
-  filter(year != c(2011, 2012)) %>% 
-  ggplot(aes(year, delta_F)) +
-  geom_col()
-
-results_long %>% 
   filter(ISO == c("USA", "JPN", "AUT")) %>% 
   ggplot(aes(year, share, fill = contribution)) +
     geom_col(position = "stack") +
@@ -69,7 +64,7 @@ results_long %>%
 
 # solve overplotting
 results_long %>% 
-  ggplot(aes(x = contribution, y = value)) + # value gets you a very orange picture
+  ggplot(aes(x = contribution, y = share)) + # very orange picture
   stat_bin_hex(colour="white", na.rm=TRUE) +
   scale_fill_gradientn(colours=c("blue","orange"), 
                        name = "Frequency", 
@@ -93,10 +88,10 @@ results_long %>%
 # general summary per variabel
 a1 <- results_long %>% 
   group_by(contribution) %>% 
-  summarize(mean = mean(value),
-            sd = sd(value),
-            min = min(value),
-            max = max(value)) %>% 
+  summarize(mean = mean(share),
+            sd = sd(share),
+            min = min(share),
+            max = max(share)) %>% 
   arrange(desc(mean))
 
 # export for latex
@@ -215,7 +210,7 @@ g1 <- results_long %>%
             sd = sd(share)) %>% 
   arrange(desc(mean))
 
-gh <- results %>%
+F_sum <- results %>%
   group_by(year) %>% 
   summarize(sum = sum(delta_F))
   
