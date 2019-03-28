@@ -18,7 +18,7 @@ L_list <- list.files(path = hybrid, pattern = "*_L_120.rds")
 L_list <- L_list[10:28]
 
 # subset L for 3 years at a time
-L_list <- L_list[1:3] %>% 
+L_list <- L_list[1] %>% 
   map(~ readRDS(paste0(hybrid,.x))) %>%
   map(~.x[-c(22801:23040, 31601:32600), -c(22801:23040, 31601:32600)])
 

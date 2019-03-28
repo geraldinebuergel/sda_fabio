@@ -1,4 +1,5 @@
 library(tidyverse)
+library(Matrix)
 
 rm(list = ls()); gc()
 
@@ -64,21 +65,6 @@ for (i in 2:3){
 }
 all.equal(F_soll[[2]], sum(loopt[[3]][["delta_F"]]))
 
-rm(list = ls()); gc()
-a <- 1:3
-source("L_helper.R")
-load("U_list.RData")
-U_list <- U_list[a]
-load("ypro_list.RData")
-ypro <- ypro[a]
-load("ysup_list.RData")
-ysup <- ysup[a]
-load("ylev_list.RData")
-ylev <- ylev[a]
-load("G_list.RData")
-G <- G[a]
-load("P_list.RData")
-P <- P[a]
 
 avg <- function(x, y){(0.5 * x) + (0.5 * y)}
 
@@ -110,17 +96,34 @@ SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0,
               con_ysup = con_ysup, con_ylev = con_ylev, con_G = con_G, con_P = con_P))
 }
 
+rm(loop10); gc()
+a <- 9:10
+b <- 9:10
+source("L_helper.R")
+load("U_list_hybrid.RData")
+U_list <- U_list[b]
+load("ypro_list_hybrid.RData")
+ypro <- ypro[b]
+load("ysup_list_hybrid.RData")
+ysup <- ysup[b]
+load("ylev_list_hybrid.RData")
+ylev <- ylev[b]
+load("G_list_hybrid.RData")
+G <- G[b]
+load("P_list_hybrid.RData")
+P <- P[b]
+
 # loop SDA with decomposed variables
-loop14 <- list()
+loop09 <- list()
 for (i in 2:3){
-  loop14[[i]] <- SDA_dec(U_list[[i]], U_list[[(i-1)]], 
-                        lpro[[i]], lpro[[(i-1)]], 
+  loop09[[i]] <- SDA_dec(U_list[[i]], U_list[[(i-1)]],
+                        lpro[[i]], lpro[[(i-1)]],
                         lsup[[i]], lsup[[(i-1)]],
                         llev[[i]], llev[[(i-1)]],
                         ypro[[i]], ypro[[(i-1)]],
                         ysup[[i]], ysup[[(i-1)]],
-                        ylev[[i]], ylev[[(i-1)]], 
+                        ylev[[i]], ylev[[(i-1)]],
                         G[[i]], G[[(i-1)]],
                         P[[i]], P[[(i-1)]])
 }
-save(loop14, file = "loop14.RData")
+save(loop09, file = "loop09_hybrid.RData")
