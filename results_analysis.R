@@ -1,6 +1,6 @@
 library(tidyverse)
 library(xtable)
-library(hexbin)
+#library(hexbin)
 
 rm(list = ls()); gc()
 
@@ -22,10 +22,10 @@ results_long$share[is.na(results_long$share)] <- 0
 # VISUAL ANALYSIS
 #---------------------------------------------------------
 
-# results_long %>%
-#   ggplot(aes(x = value)) +
-#   geom_density() +
-#   facet_wrap(~ contribution)
+results_long %>%
+  ggplot(aes(x = value)) +
+  geom_density() +
+  facet_wrap(~ contribution)
 
 results_long %>% 
   ggplot(aes(x = contribution, y = value)) +
@@ -42,17 +42,25 @@ results_long %>%
 
 # save as pdf to import into latex
 #tikz('plot1.tex',width=3.5, height=3)
-pdf("all_value.pdf", height = 6, width = 6)
-all_value
+pdf("total_absolute_con.pdf", height = 6, width = 6)
+total_absolute_con
 dev.off()
 
-# delta F according to contributions of variables
-results_long %>%
+# delta F according to contributions of variables -> total_absolute_con
+total_absolute_con <- results_long %>%
   ggplot(aes(x = year, y = value, fill = contribution)) +
-    geom_col()
+    geom_col() +
+    scale_fill_brewer(palette = "RdYlGn",
+                      name = "Variable",
+                      labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+                                    bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+                                    bquote(Delta ~ P), bquote(Delta ~ u),
+                                    bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+                                    bquote(Delta ~ y^{sup}))) +
+    ylab(bquote(Delta ~ "in ha"))
 
 results_long %>% 
-  filter(ISO == c("USA", "JPN", "AUT")) %>% 
+  filter(ISO == c("USA", "CHN", "DEU")) %>% 
   ggplot(aes(year, share, fill = contribution)) +
     geom_col(position = "stack") +
     facet_grid(~ ISO)
@@ -62,46 +70,55 @@ results_long %>%
   ggplot(aes(year, share, fill = contribution)) +
   geom_col(position = "fill")
 
-# solve overplotting
-results_long %>% 
-  ggplot(aes(x = contribution, y = share)) + # very orange picture
-  stat_bin_hex(colour="white", na.rm=TRUE) +
-  scale_fill_gradientn(colours=c("blue","orange"), 
-                       name = "Frequency", 
-                       na.value=NA)
-
-results_long %>% 
+# solve overplotting -> dist_value
+dist_value <- results_long %>% 
   ggplot(aes(x = contribution, y = value)) +
-  geom_boxplot(col = "blue") +
-  geom_jitter()
+  geom_boxplot(col = "red3") +
+  geom_jitter() +
+  xlab("Variable") +
+  ylab(bquote(Delta ~ "in ha")) +
+  scale_x_discrete(labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+                                  bquote(Delta ~ P), bquote(Delta ~ u),
+                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+                                  bquote(Delta ~ y^{sup})))
 
 results_long %>% 
-  filter(contribution == "con_llev") %>% 
+  filter(contribution == "con_ypro") %>% 
   ggplot(aes(x = contribution, y = value)) +
   geom_boxplot(col = "red") +
   geom_jitter()
+
+results_long %>% 
+  group_by(year) %>% 
+  summarize(sum_F = sum(delta_F),
+            mean_F = mean(delta_F)) %>% 
+  ggplot(aes(year, sum_F)) +
+    geom_col()
+
+# total landuse in ha -> total_landuse
+load("total_Elanduse.RData")
+total_landuse <- qplot(year, landuse, data = t, geom = "line", ylab = "landuse in ha")
+# change in total landuse in ha
+load("compare_delta_F.RData")
+qplot(year, delta_landuse, data = compare_delta_F, geom = "col")
 
 #--------------------------------------------------------
 # STATISTICAL ANALYSIS
 #--------------------------------------------------------
 
-# general summary per variabel
+# general summary per variabel, absolute
 a1 <- results_long %>% 
   group_by(contribution) %>% 
-  summarize(mean = mean(share),
-            sd = sd(share),
-            min = min(share),
-            max = max(share)) %>% 
+  summarize(mean = mean(value),
+            sd = sd(value),
+            min = min(value),
+            max = max(value)) %>% 
   arrange(desc(mean))
 
-# export for latex
 print(xtable(a1), include.rownames=FALSE)
 
-# arrange for different indicators
-a2 <- arrange(a1, desc(sd))
-a3 <- arrange(a1, desc(min))
-a4 <- arrange(a1, desc(max))
-
+# summary per variable, relative
 b1 <- results_long %>% 
   group_by(contribution) %>% 
   summarize(mean = mean(share),
@@ -109,12 +126,8 @@ b1 <- results_long %>%
             min = min(share),
             max = max(share)) %>% 
   arrange(desc(mean))
-b11 <- b1[ , c("mean":"max")]*10  
-print(xtable(b1), include.rownames=FALSE)
 
-b2 <- arrange(b1, desc(sd))
-b3 <- arrange(b1, desc(min))
-b4 <- arrange(b1, desc(max))
+print(xtable(b1), include.rownames=FALSE)
 
 # years
 c1 <- results_long %>% 
@@ -137,27 +150,6 @@ c3 <- results_long %>%
             min = min(share),
             max = max(share)) %>% 
   arrange(desc(mean))
-
-# separate pos & neg values
-d1 <- results_long %>% 
-  filter(share > 0) %>% 
-  group_by(contribution) %>% 
-  summarize(mean = mean(share),
-            sd = sd(share),
-            min = min(share),
-            max = max(share)) %>% 
-  arrange(desc(mean))
-d2 <- arrange(d1, desc(sd))
-
-d3 <- results_long %>% 
-  filter(share < 0) %>% 
-  group_by(contribution) %>% 
-  summarize(mean = mean(share),
-            sd = sd(share),
-            min = min(share),
-            max = max(share)) %>% 
-  arrange(mean)
-d4 <- arrange(d3, sd)
 
 # countries
 e1 <- results_long %>% 
@@ -182,9 +174,9 @@ e3 <- results_long %>%
             sd = sd(delta_F),
             max = max(delta_F),
             min = min(delta_F)) %>% 
-  arrange(sd)
+  arrange(desc(sd))
 
-# finde large outliers
+# find large outliers
 f1 <- results_long %>% 
   group_by(contribution, country, ISO) %>% 
   filter (contribution == "con_ypro") %>% 
@@ -199,15 +191,15 @@ f2 <- results_long %>%
 
 f3 <- results_long %>% 
   group_by(country, ISO, year, contribution) %>% 
-  summarize(max = max(share)) %>% 
+  summarize(max = max(value)) %>% 
   arrange(max)
 
 # population
 g1 <- results_long %>% 
   filter(contribution == "con_P") %>% 
   group_by(country, ISO) %>% 
-  summarize(mean = mean(share),
-            sd = sd(share)) %>% 
+  summarize(mean = mean(value),
+            sd = sd(value)) %>% 
   arrange(desc(mean))
 
 #------------------------------------
@@ -236,4 +228,3 @@ compare_delta_F <- tibble(year = c(1987:2013),
              delta_F = F_sum["sum"],
              delta_F_old = F_sum_old["sum_old"])
 save(compare_delta_F, file = "compare_delta_F.RData")
-
