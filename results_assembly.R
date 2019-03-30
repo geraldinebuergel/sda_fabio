@@ -22,11 +22,7 @@ results[[14]] <- loop_list[[14]][[1]][[2]]
 results <- unlist(results, recursive = FALSE)
 results <- split(results, rep(1:27, each = 10))
 
-<<<<<<< HEAD
-names(results) <- c(1996:2013)
-=======
 names(results) <- c(1987:2013)
->>>>>>> 9f68642b7f6dc09242cd9415036f2d74f9720ca8
 #names(results[[27]]) <- c("delta_F", "con_U", "con_lpro", "con_lsup", "con_llev",
                           #"con_ypro", "con_ysup", "con_ylev", "con_G", "con_P")
 save(results, file = "results_list_hybrid.RData")
@@ -56,34 +52,17 @@ ISO <- c("ARM","AFG","ALB","DZA","AGO","ATG","ARG","AUS","AUT","BHS",
                    "SUN","GBR","UKR","USA","BFA","URY","UZB","VEN","VNM","ETH",
                    "WSM","YUG","YEM","COD","ZMB","BEL","LUX","SRB","MNE","SDN"
 )
-<<<<<<< HEAD
 save(ISO, file = "ISO_fabio.RData")
 
-ISO <- c("CHN", "DEU", "RUS", "USA")
-save(ISO, file = "ISO_c.RData")
-
-#country codes ----------------------------------------
-country <- c("Armenia","Afghanistan","Albania","Algeria","Angola","Antigua and Barbuda","Argentina","Australia","Austria","Bahamas","Bahrain","Barbados","Belgium-Luxembourg","Bangladesh","Bolivia (Plurinational State of)","Botswana","Brazil","Belize","Solomon Islands","Brunei Darussalam","Bulgaria","Myanmar","Burundi","Cameroon","Canada","Cabo Verde","Central African Republic","Sri Lanka","Chad","Chile","China, mainland","Colombia","Congo","Costa Rica","Cuba","Cyprus","Czechoslovakia","Azerbaijan","Benin","Denmark","Dominica","Dominican Republic","Belarus","Ecuador","Egypt","El Salvador","Estonia","Fiji","Finland","France","French Polynesia","Djibouti","Georgia","Gabon","Gambia","Germany","Bosnia and Herzegovina","Ghana","Kiribati","Greece","Grenada","Guatemala","Guinea","Guyana","Haiti","Honduras","China, Hong Kong SAR","Hungary","Croatia","Iceland","India","Indonesia","Iran (Islamic Republic of)","Iraq","Ireland","Israel","Italy","Côte d'Ivoire","Kazakhstan","Jamaica","Japan","Jordan","Kyrgyzstan","Kenya","Cambodia","Democratic People's Republic of Korea","Republic of Korea","Kuwait","Latvia","Lao People's Democratic Republic","Lebanon","Lesotho","Liberia","Libya","Lithuania","China, Macao SAR","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritania","Mauritius","Mexico","Mongolia","Morocco","Mozambique","Republic of Moldova","Namibia","Nepal","Netherlands","Netherlands Antilles","New Caledonia","The former Yugoslav Republic of Macedonia","Vanuatu","New Zealand","Nicaragua","Niger","Nigeria","Norway","Pakistan","Panama","Czech Republic","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Guinea-Bissau","Timor-Leste","Puerto Rico","Eritrea","Qatar","Zimbabwe","Romania","Rwanda","Russian Federation","Serbia and Montenegro","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Sao Tome and Principe","Saudi Arabia","Senegal","Sierra Leone","Slovenia","Slovakia","Singapore","Somalia","South Africa","Spain","Suriname","Tajikistan","Swaziland","Sweden","Switzerland","Syrian Arab Republic","Turkmenistan","China, Taiwan Province of","United Republic of Tanzania","Thailand","Togo","Trinidad and Tobago","Oman","Tunisia","Turkey","United Arab Emirates","Uganda","USSR","United Kingdom","Ukraine","United States of America","Burkina Faso","Uruguay","Uzbekistan","Venezuela (Bolivarian Republic of)","Viet Nam","Ethiopia","Samoa","Yugoslav SFR","Yemen","Democratic Republic of the Congo","Zambia","Belgium","Luxembourg","Serbia","Montenegro","Sudan")
-save(country, file = "country_fabio.RData")
-
-country <- c("China, mainland", "Germany", "Russian Federation", "United States of America")
-save(country, file = "country_c.RData")
-
-# assemble tibble--------------------------
-
-load("ISO_hybrid.RData")
-load("country_hybrid.RData")
-
-=======
 ISO <- c("AUT", "BEL", "BGR", "CYP", "CZE", "DEU", "DNK", "EST", "ESP", 
                 "FIN", "FRA", "GRC", "HRV", "HUN", "IRL", "ITA", "LTU", "LUX", 
                 "LVA", "MLT", "NLD", "POL", "PRT", "ROU", "SWE", "SVN", "SVK", 
                 "GBR", "USA", "JPN", "CHN", "CAN", "KOR", "BRA", "IND", "MEX", 
                 "RUS", "AUS", "CHE", "TUR", "TWN", "NOR", "IDN", "ZAF")
-
 save(ISO, file = "hybrid_ISO.RData")
 
 ISO <- c("CHN", "DEU", "RUS", "USA")
+save(ISO, file = "ISO_c.RData")
 
 #country codes ----------------------------------------
 country <- c("Armenia","Afghanistan","Albania","Algeria","Angola","Antigua and Barbuda",
@@ -116,6 +95,7 @@ country <- c("Armenia","Afghanistan","Albania","Algeria","Angola","Antigua and B
              "Venezuela (Bolivarian Republic of)","Viet Nam","Ethiopia","Samoa","Yugoslav SFR","Yemen",
              "Democratic Republic of the Congo","Zambia","Belgium","Luxembourg","Serbia","Montenegro","Sudan"
 )
+save(country, file = "country_fabio.RData")
 
 country <- c("Austria"                   ,"Belgium"    ,"Bulgaria"        ,"Cyprus"         ,          
                     "Czech Republic"            ,"Germany"    ,"Denmark"         ,"Estonia"        ,          
@@ -132,32 +112,22 @@ country <- c("Austria"                   ,"Belgium"    ,"Bulgaria"        ,"Cypr
 save(country, file = "hybrid_country.RData")
 
 country <- c("China, mainland", "Germany", "Russian Federation", "United States of America")
+save(country, file = "country_c.RData")
 
 # assemble tibble--------------------------
 
->>>>>>> 9f68642b7f6dc09242cd9415036f2d74f9720ca8
 # function isolates variables and converts them into a vector
 vec_list <- function(x){
   map(results, x) %>% 
     unlist() %>%
-<<<<<<< HEAD
     matrix(nrow = length(results), ncol = length(results[[1]][[1]]), byrow = TRUE) %>% 
-    as.vector()
-}
-
-results <- tibble(country = as.factor(rep(country, each = length(results))),
-                      ISO = as.factor(rep(ISO, each = length(results))),
-                      year = as.factor(rep(names(results), times = length(results[[1]][[1]]))),
-=======
-    matrix(nrow = length(results), ncol = length(results[[1]][["delta_F"]]), byrow = TRUE) %>% 
     as.vector()
 }
 
 # makes tibble from ISO, country, results (with year names)
 results <- tibble(country = as.factor(rep(country, each = length(results))),
                       ISO = as.factor(rep(ISO, each = length(results))),
-                      year = as.factor(rep(names(results), times = length(results[[1]][["delta_F"]]))),
->>>>>>> 9f68642b7f6dc09242cd9415036f2d74f9720ca8
+                      year = as.factor(rep(names(results), times = length(results[[1]][[1]]))),
                       delta_F = vec_list("delta_F"),
                       con_U = vec_list("con_U"),
                       con_lpro = vec_list("con_lpro"),
@@ -170,11 +140,8 @@ results <- tibble(country = as.factor(rep(country, each = length(results))),
                       con_P = vec_list("con_P")
 )
 save(results, file = "results_tbl_hybrid.RData")
-<<<<<<< HEAD
 
 # get 120 products
 # rearrange for products as variables
 # long form: country, ISO, year, contribution, product, value
 # supplier countries?
-=======
->>>>>>> 9f68642b7f6dc09242cd9415036f2d74f9720ca8
