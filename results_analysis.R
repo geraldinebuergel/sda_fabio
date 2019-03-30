@@ -1,6 +1,5 @@
 library(tidyverse)
 library(xtable)
-#library(hexbin)
 
 rm(list = ls()); gc()
 
@@ -10,7 +9,7 @@ rm(list = ls()); gc()
 #
 #---------------------------------------------------
 
-load("results_tbl.RData")
+load("results_tbl_hybrid.RData")
 
 # convert tbl into long format & replace NaN values
 results_long <- results %>%
@@ -42,12 +41,12 @@ results_long %>%
 
 # save as pdf to import into latex
 #tikz('plot1.tex',width=3.5, height=3)
-pdf("total_absolute_con.pdf", height = 6, width = 6)
+pdf("total_absolute_con_hyb.pdf", height = 6, width = 6)
 total_absolute_con
 dev.off()
 
 # delta F according to contributions of variables -> total_absolute_con
-total_absolute_con <- results_long %>%
+results_long %>%
   ggplot(aes(x = year, y = value, fill = contribution)) +
     geom_col() +
     scale_fill_brewer(palette = "RdYlGn",
@@ -84,7 +83,7 @@ dist_value <- results_long %>%
                                   bquote(Delta ~ y^{sup})))
 
 results_long %>% 
-  filter(contribution == "con_ypro") %>% 
+  filter(contribution == "con_lsup") %>% 
   ggplot(aes(x = contribution, y = value)) +
   geom_boxplot(col = "red") +
   geom_jitter()
@@ -126,8 +125,15 @@ b1 <- results_long %>%
             min = min(share),
             max = max(share)) %>% 
   arrange(desc(mean))
+b2 <- results_long %>% 
+  group_by(contribution) %>% 
+  summarize(mean = mean(share)*100,
+            sd = sd(share)*100,
+            min = min(share)*100,
+            max = max(share)*100) %>% 
+  arrange(desc(mean))
 
-print(xtable(b1), include.rownames=FALSE)
+print(xtable(b2), include.rownames=FALSE)
 
 # years
 c1 <- results_long %>% 
@@ -174,29 +180,29 @@ e3 <- results_long %>%
             sd = sd(delta_F),
             max = max(delta_F),
             min = min(delta_F)) %>% 
-  arrange(desc(sd))
+  arrange(desc(mean))
 
 # find large outliers
-f1 <- results_long %>% 
+results_long %>% 
   group_by(contribution, country, ISO) %>% 
-  filter (contribution == "con_ypro") %>% 
+  filter (contribution == "con_lsup") %>% 
   summarize(max = max(value)) %>% 
   arrange(desc(max))
 
-f2 <- results_long %>% 
+results_long %>% 
   group_by(contribution, country, ISO) %>% 
-  filter (contribution == "con_ypro") %>% 
+  filter (contribution == "con_lpro") %>% 
   summarize(min = min(value)) %>% 
   arrange(desc(min))
 
-f3 <- results_long %>% 
+results_long %>% 
   group_by(country, ISO, year, contribution) %>% 
   summarize(max = max(value)) %>% 
-  arrange(max)
+  arrange(desc(max))
 
-# population
-g1 <- results_long %>% 
-  filter(contribution == "con_P") %>% 
+# expected driver
+results_long %>% 
+  filter(contribution == "con_G") %>% 
   group_by(country, ISO) %>% 
   summarize(mean = mean(value),
             sd = sd(value)) %>% 

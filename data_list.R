@@ -4,7 +4,7 @@ rm(list = ls()); gc()
 
 #----------------------------------------------------------------------------
 #
-# LOAD AND CONVERT DATA FILES (190 countries)
+# LOAD AND CONVERT DATA FILES (1986-2013, 190 countries, 120 products)
 #
 #----------------------------------------------------------------------------
 
@@ -38,7 +38,7 @@ save(U_list, file = "U_list.RData")
 L_list <- list.files(path = fabio, pattern = "*_L.rds")
 
 # subset L for 3 years at a time
-L_list <- L_list[26:28] %>% 
+L_list <- L_list[1:3] %>% 
   map(~ readRDS(paste0(fabio,.x))) %>%
   lapply(as.data.frame) %>% 
   map(~.x[1:22800, 1:22800]) %>% 
