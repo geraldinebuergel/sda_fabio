@@ -22,7 +22,7 @@ results[[14]] <- loop_list[[14]][[1]][[2]]
 results <- unlist(results, recursive = FALSE)
 results <- split(results, rep(1:27, each = 10))
 
-names(results) <- c(1987:2013)
+names(results) <- c(1996:2013)
 #names(results[[27]]) <- c("delta_F", "con_U", "con_lpro", "con_lsup", "con_llev",
                           #"con_ypro", "con_ysup", "con_ylev", "con_G", "con_P")
 save(results, file = "results_list_hybrid.RData")
@@ -141,7 +141,16 @@ results <- tibble(country = as.factor(rep(country, each = length(results))),
 )
 save(results, file = "results_tbl_hybrid.RData")
 
-# get 120 products
-# rearrange for products as variables
-# long form: country, ISO, year, contribution, product, value
-# supplier countries?
+class <- read_xlsx("C:/Users/Zoe/Dropbox/Master Arbeit/excel/income_class.xlsx")
+
+i1 <- intersect(ISO, income$ISO)
+i2 <- setdiff(ISO, i1)
+i3 <- match(ISO, income$ISO)
+i4 <- income[c(i3), ]
+
+income <- i4
+save(income, file = "income_class_hybrid.RData")
+
+results <- add_column(results, income = as.factor(rep(income$income, each = 27)))
+
+save(results, file = "results_tbl_inc.RData")
