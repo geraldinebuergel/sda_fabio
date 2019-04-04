@@ -154,3 +154,5 @@ save(income, file = "income_class_hybrid.RData")
 results <- add_column(results, income = as.factor(rep(income$income, each = 27)))
 
 save(results, file = "results_tbl_inc.RData")
+
+setdiff(income$ISO, ISO)
