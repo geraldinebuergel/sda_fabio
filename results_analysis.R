@@ -32,43 +32,16 @@ results_long$income <- factor(results_long$income, levels = c("High income",
 #---------------------------------------------------------
 
 # save as pdf to import into latex
-pdf("total_landuse.pdf")
-total_landuse
+pdf("fabio_country.pdf")
+fabio_country
 dev.off()
 
-# total_absolute_con per year
-results_long %>%
-  ggplot(aes(x = year, y = value, fill = contribution)) +
-    geom_col() +
-    scale_fill_brewer(palette = "RdYlGn",
-                      name = "Variable",
-                      labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
-                                    bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
-                                    bquote(Delta ~ P), bquote(Delta ~ u),
-                                    bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
-                                    bquote(Delta ~ y^{sup}))) +
-    ylab(bquote(Delta ~ "in ha")) +
-    theme(axis.text.x = element_text(angle = 45))
-
-# total_relative_con per year
-results_long %>%
-  ggplot(aes(x = year, y = share, fill = contribution)) +
-  geom_col(position = "fill") +
-  scale_fill_brewer(palette = "RdYlGn",
-                    name = "Variable",
-                    labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
-                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
-                                  bquote(Delta ~ P), bquote(Delta ~ u),
-                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
-                                  bquote(Delta ~ y^{sup}))) +
-  ylab("total relative contibution") +
-  theme(axis.text.x = element_text(angle = 45))
-
-# country level
-results_long %>% 
+# country level -> hybrid_country
+fabio_country <- results_long %>% 
   group_by(country, contribution) %>% 
-  filter(ISO %in% c("USA", "CHN", "RUS", "DEU", "IND")) %>% 
-  ggplot(aes(x=country, y=value, fill = contribution)) +
+  filter(ISO %in% c("USA", "CHN", "RUS", "IND", "DEU")) %>% 
+  summarize(sum = sum(value)) %>% 
+  ggplot(aes(x=country, y=sum, fill = contribution)) +
     geom_col() +
   coord_flip() +
   scale_fill_brewer(palette = "RdYlGn",
@@ -79,13 +52,14 @@ results_long %>%
                                   bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
                                   bquote(Delta ~ y^{sup}))) +
   ylab("total absolute contibution in ha")
+  
 
-# total contribution per income class -> fabio_inc
+# total contribution per income class -> hybrid_inc
 results_long %>% 
   drop_na() %>% 
   group_by(income, contribution) %>% 
   summarize(sum = sum(value)) %>% 
-  ggplot(aes(x = income, y = sum, fill = contribution)) +
+  ggplot(aes(x = income, y = value, fill = contribution)) +
     geom_col() +
     scale_fill_brewer(palette = "RdYlGn",
                       name = "Variable",
@@ -95,12 +69,12 @@ results_long %>%
                                   bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
                                   bquote(Delta ~ y^{sup}))) +
     xlab("") +
-    ylab("total contribution in ha")+
+    ylab("total contribution in ha") +
     coord_flip()
 
 # country details per year
 results_long %>% 
-  filter(ISO %in% c("USA", "CHN", "RUS", "DEU", "IND")) %>% 
+  filter(ISO %in% c("USA", "CHN", "RUS", "IND")) %>% 
   ggplot(aes(year, value, fill = contribution)) +
   geom_col(position = "stack") +
   scale_fill_brewer(palette = "RdYlGn",
@@ -113,19 +87,6 @@ results_long %>%
   ylab("total absolute contibution in ha") +
   theme(axis.text.x = element_text(angle = 45)) +
   facet_wrap(~ country)
-
-# solve overplotting -> dist_value
-results_long %>% 
-  ggplot(aes(x = contribution, y = value)) +
-  geom_boxplot(col = "red3") +
-  geom_jitter() +
-  xlab("Variable") +
-  ylab(bquote(Delta ~ "in ha")) +
-  scale_x_discrete(labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
-                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
-                                  bquote(Delta ~ P), bquote(Delta ~ u),
-                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
-                                  bquote(Delta ~ y^{sup})))
 
 # sum_delta_F
 results_long %>% 
@@ -203,7 +164,8 @@ c3 <- results_long %>%
 e1 <- results_long %>% 
   group_by(country, ISO, contribution) %>% 
   summarize(mean = mean(value),
-            sd = sd(value)) %>% 
+            sd = sd(value),
+            sum = sum(value)) %>% 
   arrange(desc(mean))
 
 e2 <- results_long %>% 
@@ -215,7 +177,8 @@ e2 <- results_long %>%
 e3 <- results_long %>% 
   group_by(country, ISO) %>% 
   summarize(mean = mean(delta_F),
-            sd = sd(delta_F)) %>% 
+            sd = sd(delta_F),
+            sum = sum(delta_F)) %>% 
   arrange(desc(mean))
 
 # expected driver
