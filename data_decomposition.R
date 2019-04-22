@@ -8,23 +8,26 @@ rm(list = ls()); gc()
 #
 #----------------------------------------------------------------------------
 
+norow <- 22800
+nocol <- 190
+
 #-------------------------------
 # decompose L
 #-------------------------------
 
-#load("L_list.RData")
+load("L_list.RData")
 
 # level of total input requirements (Ljs)
 llev <- lapply(L_list, colSums) %>% 
-  lapply(matrix, nrow = 22800, ncol = 22800, byrow = TRUE)
+  lapply(matrix, nrow = norow, ncol = norow, byrow = TRUE)
 
-#save(llev, file = "llev_list.RData")
+save(llev, file = "llev_list_c.RData")
 
 # distribution of supplier countries (Ljrs/Ljs)
 ljrs <- lapply(L_list, as.data.frame) %>% 
-  lapply(split.data.frame, rep(1:190, each = 120)) %>% 
+  lapply(split.data.frame, rep(1:nocol, each = 120)) %>% 
   lapply(lapply, colSums) %>% 
-  map(~ matrix(unlist(.x), nrow = 190, ncol = 22800, byrow = TRUE)) %>% 
+  map(~ matrix(unlist(.x), nrow = nocol, ncol = norow, byrow = TRUE)) %>% 
   map(~ .x[rep(1:nrow(.x), each = 120), ])
 
 #save(ljrs, file = "ljrs.RData")
@@ -32,13 +35,13 @@ ljrs <- lapply(L_list, as.data.frame) %>%
 lsup <- map2(ljrs, llev, ~.x / .y) %>% 
   rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
 
-#save(lsup, file = "lsup_list.RData")
+save(lsup, file = "lsup_list.RData")
 
 # distribution of intermediate products (Lijrs/Ljrs)
 lpro <- map2(L_list, ljrs, ~.x / .y) %>% 
   rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
 
-#save(lpro, file = "lpro_list.RData")
+save(lpro, file = "lpro_list.RData")
 
 #-------------------------------
 # decompose Y
@@ -48,12 +51,12 @@ load("Y_list.RData")
 
 # total final demand for food (Ys)
 ys <- lapply(Y_list, colSums) %>% 
-  lapply(matrix, nrow = 22800, ncol = 190, byrow = TRUE)
+  lapply(matrix, nrow = norow, ncol = nocol, byrow = TRUE)
 
 # distribution of supplier countries (Yrs/Ys)
-yrs <- lapply(Y_list, split.data.frame, rep(1:190, each = 120)) %>% 
+yrs <- lapply(Y_list, split.data.frame, rep(1:nocol, each = 120)) %>% 
   lapply(lapply, colSums) %>% 
-  map(~ matrix(unlist(.x), nrow = 190, ncol = 190, byrow = TRUE)) %>% 
+  map(~ matrix(unlist(.x), nrow = nocol, ncol = nocol, byrow = TRUE)) %>% 
   map(~ .x[rep(1:nrow(.x), each = 120), ])
 
 ysup <- map2(yrs, ys, ~.x / .y) %>% 
@@ -70,8 +73,8 @@ save(ypro, file = "ypro_list.RData")
 load("GDP.RData")
 load("Population.RData")
 
-gdp <- map(gdp, ~.x[rep(1:190, each = 120)]) %>% 
-  map(~ matrix(.x, nrow = length(.x), ncol = 190))
+gdp <- map(gdp, ~.x[rep(1:nocol, each = 120)]) %>% 
+  map(~ matrix(.x, nrow = length(.x), ncol = nocol))
 
 # level of final demand per GDP (Ys/GDP)
 ylev <- map2(ys, gdp, ~.x / .y) %>% 
@@ -80,8 +83,8 @@ ylev <- map2(ys, gdp, ~.x / .y) %>%
 save(ylev, file = "ylev_list.RData")
 
 # Population (P)
-P <- map(pop, ~.x[rep(1:190, each = 120)]) %>% 
-  map(~ matrix(.x, nrow = length(.x), ncol = 190))
+P <- map(pop, ~.x[rep(1:nocol, each = 120)]) %>% 
+  map(~ matrix(.x, nrow = length(.x), ncol = nocol))
 
 save(P, file = "P_list.RData")
 
@@ -91,6 +94,6 @@ G <- map2(gdp, P, ~.x / .y) %>%
 
 save(G, file = "G_list.RData")
 
-Y_dec <- pmap(list(ypro, ysup, ylev, G, P), ~..1 * ..2 * ..3 * ..4 * ..5)
-rapply(Y_dec, function(x) ifelse(!is.finite(x), 0, x), how = "list")
+Y_dec <- pmap(list(ypro, ysup, ylev, G, P), ~..1 * ..2 * ..3 * ..4 * ..5) %>% 
+  rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
 all.equal(Y_list, Y_dec)

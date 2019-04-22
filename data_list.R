@@ -35,10 +35,10 @@ U_list <- map2(E_landuse, X_list, ~.x / .y) %>%
 save(U_list, file = "U_list.RData")
 
 # load L files
-L_list <- list.files(path = fabio, pattern = "*_L.rds")
+L_list <- list.files(path = fabio, pattern = "*_L_mass.rds")
 
 # subset L for 3 years at a time
-L_list <- L_list[1:3] %>% 
+L_list <- L_list[22:28] %>% 
   map(~ readRDS(paste0(fabio,.x))) %>%
   lapply(as.data.frame) %>% 
   map(~.x[1:22800, 1:22800]) %>% 
@@ -52,8 +52,8 @@ Y_list <-  list.files(path = fabio, pattern = "*_Y.rds") %>%
   map(~ readRDS(paste0(fabio,.x))) %>% 
   lapply(as.data.frame) %>% 
   lapply(dplyr::select, contains("Food")) %>% 
-  lapply(as.matrix) %>% 
+  lapply(as.matrix) #%>% 
   map(~.x[-c(22801:23040), -c(191, 192)])
-
+  
 # save Y
 save(Y_list, file = "Y_list.RData")
