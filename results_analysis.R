@@ -1,5 +1,4 @@
 library(tidyverse)
-library(xtable)
 
 rm(list = ls()); gc()
 
@@ -32,12 +31,12 @@ results_long$income <- factor(results_long$income, levels = c("High income",
 #---------------------------------------------------------
 
 # save as pdf to import into latex
-pdf("fabio_country.pdf")
-fabio_country
+pdf("hybrid_country.pdf")
+hybrid_country
 dev.off()
 
 # country level -> hybrid_country
-fabio_country <- results_long %>% 
+hybrid_country <- results_long %>% 
   group_by(country, contribution) %>% 
   filter(ISO %in% c("USA", "CHN", "RUS", "IND", "DEU")) %>% 
   summarize(sum = sum(value)) %>% 
@@ -45,7 +44,7 @@ fabio_country <- results_long %>%
     geom_col() +
   coord_flip() +
   scale_fill_brewer(palette = "RdYlGn",
-                    name = "Variable",
+                    name = "Driver",
                     labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
                                   bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
                                   bquote(Delta ~ P), bquote(Delta ~ u),
@@ -54,15 +53,15 @@ fabio_country <- results_long %>%
   ylab("total absolute contibution in ha")
   
 
-# total contribution per income class -> hybrid_inc
-results_long %>% 
+# total contribution per income class -> fabio_inc
+hybrid_inc <- results_long %>% 
   drop_na() %>% 
   group_by(income, contribution) %>% 
   summarize(sum = sum(value)) %>% 
-  ggplot(aes(x = income, y = value, fill = contribution)) +
+  ggplot(aes(x = income, y = sum, fill = contribution)) +
     geom_col() +
     scale_fill_brewer(palette = "RdYlGn",
-                      name = "Variable",
+                      name = "Driver",
                       labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
                                   bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
                                   bquote(Delta ~ P), bquote(Delta ~ u),
@@ -130,8 +129,6 @@ fabio_driver <- ggplot(a1, aes(contribution, share)) +
                                  bquote(Delta ~ y^{sup}))) +
   theme(text = element_text(size=15))
 
-#print(xtable(a1), include.rownames=FALSE)
-
 # summary per variable in %
 b2 <- results_long %>% 
   group_by(contribution) %>% 
@@ -139,8 +136,6 @@ b2 <- results_long %>%
             sd = sd(share)*100,
             sum = sum(share)) %>% 
   arrange(desc(mean))
-
-#print(xtable(b2), include.rownames=FALSE)
 
 # years
 c1 <- results_long %>% 
@@ -179,12 +174,4 @@ e3 <- results_long %>%
   summarize(mean = mean(delta_F),
             sd = sd(delta_F),
             sum = sum(delta_F)) %>% 
-  arrange(desc(mean))
-
-# expected driver
-results_long %>% 
-  filter(contribution == "con_G") %>% 
-  group_by(country, ISO) %>% 
-  summarize(mean = mean(value),
-            sd = sd(value)) %>% 
   arrange(desc(mean))
