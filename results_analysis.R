@@ -1,6 +1,4 @@
 library(tidyverse)
-library(xtable)
-library(hexbin)
 
 rm(list = ls()); gc()
 
@@ -10,111 +8,134 @@ rm(list = ls()); gc()
 #
 #---------------------------------------------------
 
-load("results_tbl.RData")
+# load("results_tbl.RData")
+# # convert tbl into long format & replace NaN values
+# results_long <- results %>%
+#   gather(contribution, value, con_U:con_P) %>% 
+#   mutate(share = value / delta_F)
+# results_long$share[is.na(results_long$share)] <- 0
 
-# convert tbl into long format & replace NaN values
+# bring results table into long format (=tidy)
+load("results_tbl_inc.RData")
 results_long <- results %>%
   gather(contribution, value, con_U:con_P) %>% 
   mutate(share = value / delta_F)
 results_long$share[is.na(results_long$share)] <- 0
+results_long$income <- factor(results_long$income, levels = c("High income", 
+                                                              "Upper middle income",
+                                                              "Lower middle income",
+                                                              "Low income"))
 
 #---------------------------------------------------------
 # VISUAL ANALYSIS
 #---------------------------------------------------------
 
-# results_long %>%
-#   ggplot(aes(x = value)) +
-#   geom_density() +
-#   facet_wrap(~ contribution)
-
-results_long %>% 
-  ggplot(aes(x = contribution, y = value)) +
-  geom_boxplot()
-
-# results_long %>%
-#   ggplot(aes(x = share)) +
-#     geom_density() +
-#     facet_wrap(~ contribution)
-
-results_long %>% 
-  ggplot(aes(x = contribution, y = share)) +
-  geom_boxplot()
-
 # save as pdf to import into latex
-#tikz('plot1.tex',width=3.5, height=3)
-pdf("all_value.pdf", height = 6, width = 6)
-all_value
+pdf("hybrid_country.pdf")
+hybrid_country
 dev.off()
 
-# delta F according to contributions of variables
-results_long %>%
-  ggplot(aes(x = year, y = value, fill = contribution)) +
-    geom_col()
+# country level -> hybrid_country
+hybrid_country <- results_long %>% 
+  group_by(country, contribution) %>% 
+  filter(ISO %in% c("USA", "CHN", "RUS", "IND", "DEU")) %>% 
+  summarize(sum = sum(value)) %>% 
+  ggplot(aes(x=country, y=sum, fill = contribution)) +
+    geom_col() +
+  coord_flip() +
+  scale_fill_brewer(palette = "RdYlGn",
+                    name = "Driver",
+                    labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+                                  bquote(Delta ~ P), bquote(Delta ~ u),
+                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+                                  bquote(Delta ~ y^{sup}))) +
+  ylab("total absolute contibution in ha")
+  
 
-results_long %>% 
-  filter(ISO == c("USA", "JPN", "AUT")) %>% 
-  ggplot(aes(year, share, fill = contribution)) +
-    geom_col(position = "stack") +
-    facet_grid(~ ISO)
+# total contribution per income class -> fabio_inc
+hybrid_inc <- results_long %>% 
+  drop_na() %>% 
+  group_by(income, contribution) %>% 
+  summarize(sum = sum(value)) %>% 
+  ggplot(aes(x = income, y = sum, fill = contribution)) +
+    geom_col() +
+    scale_fill_brewer(palette = "RdYlGn",
+                      name = "Driver",
+                      labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+                                  bquote(Delta ~ P), bquote(Delta ~ u),
+                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+                                  bquote(Delta ~ y^{sup}))) +
+    xlab("") +
+    ylab("total contribution in ha") +
+    coord_flip()
 
+# country details per year
 results_long %>% 
-  filter(ISO == "CHN") %>% 
-  ggplot(aes(year, share, fill = contribution)) +
-  geom_col(position = "fill")
+  filter(ISO %in% c("USA", "CHN", "RUS", "IND")) %>% 
+  ggplot(aes(year, value, fill = contribution)) +
+  geom_col(position = "stack") +
+  scale_fill_brewer(palette = "RdYlGn",
+                    name = "Variable",
+                    labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+                                  bquote(Delta ~ P), bquote(Delta ~ u),
+                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+                                  bquote(Delta ~ y^{sup}))) +
+  ylab("total absolute contibution in ha") +
+  theme(axis.text.x = element_text(angle = 45)) +
+  facet_wrap(~ country)
 
-# solve overplotting
+# sum_delta_F
 results_long %>% 
-  ggplot(aes(x = contribution, y = share)) + # very orange picture
-  stat_bin_hex(colour="white", na.rm=TRUE) +
-  scale_fill_gradientn(colours=c("blue","orange"), 
-                       name = "Frequency", 
-                       na.value=NA)
+  group_by(country) %>% 
+  summarize(sum_F = sum(delta_F)) %>% 
+  ggplot(aes(country, sum_F)) +
+    geom_col() +
+    ylab(bquote(Delta ~ F)) +
+    theme(axis.text.x = element_text(angle = 45)) +
+  coord_flip()
 
-results_long %>% 
-  ggplot(aes(x = contribution, y = value)) +
-  geom_boxplot(col = "blue") +
-  geom_jitter()
-
-results_long %>% 
-  filter(contribution == "con_llev") %>% 
-  ggplot(aes(x = contribution, y = value)) +
-  geom_boxplot(col = "red") +
-  geom_jitter()
+# total landuse in ha -> total_landuse
+load("total_Elanduse.RData")
+qplot(year, landuse, data = t, geom = "line", ylab = "landuse in ha")
+total_landuse <- ggplot(t, aes(year, landuse)) +
+  geom_line() +
+  ylab("landuse in ha") +
+  theme(text = element_text(size=15))
 
 #--------------------------------------------------------
 # STATISTICAL ANALYSIS
 #--------------------------------------------------------
 
-# general summary per variabel
+# general summary per variabel in ha
 a1 <- results_long %>% 
   group_by(contribution) %>% 
-  summarize(mean = mean(share),
-            sd = sd(share),
-            min = min(share),
-            max = max(share)) %>% 
-  arrange(desc(mean))
+  summarize(mean = mean(value),
+            sd = sd(value),
+            sum = sum(value)) %>% 
+  mutate(share = sum*100/sum(results$delta_F))
 
-# export for latex
-print(xtable(a1), include.rownames=FALSE)
+# total_contribution -> fabio_driver
+fabio_driver <- ggplot(a1, aes(contribution, share)) +
+  geom_col() +
+  ylab("contribution in %") +
+  xlab("") +
+  scale_x_discrete(labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+                                 bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+                                 bquote(Delta ~ P), bquote(Delta ~ u),
+                                 bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+                                 bquote(Delta ~ y^{sup}))) +
+  theme(text = element_text(size=15))
 
-# arrange for different indicators
-a2 <- arrange(a1, desc(sd))
-a3 <- arrange(a1, desc(min))
-a4 <- arrange(a1, desc(max))
-
-b1 <- results_long %>% 
+# summary per variable in %
+b2 <- results_long %>% 
   group_by(contribution) %>% 
-  summarize(mean = mean(share),
-            sd = sd(share),
-            min = min(share),
-            max = max(share)) %>% 
+  summarize(mean = mean(share)*100,
+            sd = sd(share)*100,
+            sum = sum(share)) %>% 
   arrange(desc(mean))
-b11 <- b1[ , c("mean":"max")]*10  
-print(xtable(b1), include.rownames=FALSE)
-
-b2 <- arrange(b1, desc(sd))
-b3 <- arrange(b1, desc(min))
-b4 <- arrange(b1, desc(max))
 
 # years
 c1 <- results_long %>% 
@@ -125,88 +146,32 @@ c1 <- results_long %>%
 c2 <- results_long %>% 
   group_by(year, contribution) %>% 
   summarize(mean = mean(value),
-            sd = sd(value),
-            min = min(value),
-            max = max(value)) %>% 
+            sd = sd(value)) %>% 
   arrange(desc(mean))
 
 c3 <- results_long %>% 
   group_by(year, contribution) %>% 
   summarize(mean = mean(share),
-            sd = sd(share),
-            min = min(share),
-            max = max(share)) %>% 
+            sd = sd(share)) %>% 
   arrange(desc(mean))
-
-# separate pos & neg values
-d1 <- results_long %>% 
-  filter(share > 0) %>% 
-  group_by(contribution) %>% 
-  summarize(mean = mean(share),
-            sd = sd(share),
-            min = min(share),
-            max = max(share)) %>% 
-  arrange(desc(mean))
-d2 <- arrange(d1, desc(sd))
-
-d3 <- results_long %>% 
-  filter(share < 0) %>% 
-  group_by(contribution) %>% 
-  summarize(mean = mean(share),
-            sd = sd(share),
-            min = min(share),
-            max = max(share)) %>% 
-  arrange(mean)
-d4 <- arrange(d3, sd)
 
 # countries
 e1 <- results_long %>% 
   group_by(country, ISO, contribution) %>% 
   summarize(mean = mean(value),
             sd = sd(value),
-            min = min(value),
-            max = max(value)) %>% 
+            sum = sum(value)) %>% 
   arrange(desc(mean))
 
 e2 <- results_long %>% 
   group_by(country, ISO, contribution) %>% 
   summarize(mean = mean(share),
-            sd = sd(share),
-            max = max(share),
-            min = min(share)) %>% 
+            sd = sd(share)) %>% 
   arrange(desc(mean))
 
 e3 <- results_long %>% 
   group_by(country, ISO) %>% 
   summarize(mean = mean(delta_F),
             sd = sd(delta_F),
-            max = max(delta_F),
-            min = min(delta_F)) %>% 
-  arrange(sd)
-
-# finde large outliers
-f1 <- results_long %>% 
-  group_by(contribution, country, ISO) %>% 
-  filter (contribution == "con_ypro") %>% 
-  summarize(max = max(value)) %>% 
-  arrange(desc(max))
-
-f2 <- results_long %>% 
-  group_by(contribution, country, ISO) %>% 
-  filter (contribution == "con_ypro") %>% 
-  summarize(min = min(value)) %>% 
-  arrange(desc(min))
-
-f3 <- results_long %>% 
-  group_by(country, ISO, year, contribution) %>% 
-  summarize(max = max(share)) %>% 
-  arrange(max)
-
-# population
-g1 <- results_long %>% 
-  filter(contribution == "con_P") %>% 
-  group_by(country, ISO) %>% 
-  summarize(mean = mean(share),
-            sd = sd(share)) %>% 
+            sum = sum(delta_F)) %>% 
   arrange(desc(mean))
-
