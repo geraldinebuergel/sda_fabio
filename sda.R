@@ -3,6 +3,8 @@ library(Matrix)
 
 rm(list = ls()); gc()
 
+avg <- function(x, y){(0.5 * x) + (0.5 * y)}
+
 #---------------------------------
 # 
 # SDA FUNCTION
@@ -15,25 +17,25 @@ lpro[[1]] <- NULL
 lsup[[1]] <- NULL
 gc()
 a <- 3
-b <- 2:3
+b <- 26:28
 source("L_helper.R")
-load("U_list_hybrid.RData")
+load("U_list_p.RData")
 U_list <- U_list[b]
-load("ypro_list_hybrid.RData")
+load("ypro_list_p.RData")
 ypro <- ypro[b]
-load("ysup_list_hybrid.RData")
+load("ysup_list_p.RData")
 ysup <- ysup[b]
-load("ylev_list_hybrid.RData")
+load("ylev_list_p.RData")
 ylev <- ylev[b]
-load("G_list_hybrid.RData")
+load("G_list_p.RData")
 G <- G[b]
-load("P_list_hybrid.RData")
+load("P_list_p.RData")
 P <- P[b]
 
 # loop SDA with decomposed variables
-loop02 <- list()
+loop14 <- list()
 for (i in 2:3){
-  loop02[[i]] <- SDA_dec(U_list[[i]], U_list[[(i-1)]],
+  loop14[[i]] <- SDA_dec_p(U_list[[i]], U_list[[(i-1)]],
                         lpro[[i]], lpro[[(i-1)]],
                         lsup[[i]], lsup[[(i-1)]],
                         llev[[i]], llev[[(i-1)]],
@@ -43,10 +45,9 @@ for (i in 2:3){
                         G[[i]], G[[(i-1)]],
                         P[[i]], P[[(i-1)]])
 }
-save(loop02, file = "loop02_hybrid.RData")
+save(loop14, file = "loop14_p.RData")
 
 # SDA function with decomposed inputs
-avg <- function(x, y){(0.5 * x) + (0.5 * y)}
 SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0, 
                     ypro1, ypro0, ysup1, ysup0, ylev1, ylev0, G1, G0, P1, P0){
   con_U <- avg((U1 - U0) %*% (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * P1), 
@@ -134,43 +135,44 @@ SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0,
 # all.equal(F_soll[[2]], sum(loopt[[3]][["delta_F"]]))
 
 #-------------------------------------------------------------
-# COUNTRY LEVEL
+# PRODUCT LEVEL
 #-------------------------------------------------------------
 
-# load("U_list_c.RData")
-# load("llev_list_c.RData")
-# load("lsup_list_c.RData")
-# load("lpro_list_c.RData")
-# load("ylev_list_c.RData")
-# load("ysup_list_c.RData")
-# load("ypro_list_c.RData")
-# load("G_list_c.RData")
-# load("P_list_c.RData")
+ load("U_list_p.RData")
+ load("llev_list_p.RData")
+ load("lsup_list_p.RData")
+ load("lpro_list_p.RData")
+ load("ylev_list_p.RData")
+ load("ysup_list_p.RData")
+ load("ypro_list_p.RData")
+ load("G_list_p.RData")
+ load("P_list_p.RData")
 
-# # SDA function for country level detail
-# SDA_dec_c <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0, 
-#                     ypro1, ypro0, ysup1, ysup0, ylev1, ylev0, G1, G0, P1, P0){
-#   con_U <- avg((U1 - U0) * (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * P1), 
-#                (U1 - U0) * (lpro0 * lsup0 * llev0) %*% (ypro0 * ysup0 * ylev0 * G0 * P0))
-#   con_lpro <- avg(U0 * ((lpro1 - lpro0) * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * P1), 
-#                   U1 * ((lpro1 - lpro0) * lsup0 * llev0) %*% (ypro0 * ysup0 * ylev0 * G0 * P0))
-#   con_lsup <- avg(U0 * (lpro0 * (lsup1 - lsup0) * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * P1), 
-#                   U1 * (lpro1 * (lsup1 - lsup0) * llev0) %*% (ypro0 * ysup0 * ylev0 * G0 * P0))
-#   con_llev <- avg(U0 * (lpro0 * lsup0 * (llev1 - llev0)) %*% (ypro1 * ysup1 * ylev1 * G1 * P1), 
-#                   U1 * (lpro1 * lsup1 * (llev1 - llev0)) %*% (ypro0 * ysup0 * ylev0 * G0 * P0))
-#   con_ypro <- avg(U0 * (lpro0 * lsup0 * llev0) %*% ((ypro1 - ypro0) * ysup1 * ylev1 * G1 * P1), 
-#                   U1 * (lpro1 * lsup1 * llev1) %*% ((ypro1 - ypro0) * ysup0 * ylev0 * G0 * P0))
-#   con_ysup <- avg(U0 * (lpro0 * lsup0 * llev0) %*% (ypro0 * (ysup1 - ysup0) * ylev1 * G1 * P1), 
-#                   U1 * (lpro1 * lsup1 * llev1) %*% (ypro1 * (ysup1 - ysup0) * ylev0 * G0 * P0))
-#   con_ylev <- avg(U0 * (lpro0 * lsup0 * llev0) %*% (ypro0 * ysup0 * (ylev1 - ylev0) * G1 * P1), 
-#                   U1 * (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * (ylev1 - ylev0) * G0 * P0))
-#   con_G <- avg(U0 * (lpro0 * lsup0 * llev0) %*% (ypro0 * ysup0 * ylev0 * (G1 - G0) * P1), 
-#                U1 * (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * (G1 - G0) * P0))
-#   con_P <- avg(U0 * (lpro0 * lsup0 * llev0) %*% (ypro0 * ysup0 * ylev0 * G0 * (P1- P0)), 
-#                U1 * (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * (P1 - P0)))
-#   delta_F <- con_U + con_lpro + con_lsup + con_llev + con_ypro + con_ysup + 
-#     con_ylev + con_G + con_P
-#   return(list(delta_F = delta_F, con_U = con_U, con_lpro = con_lpro, 
-#               con_lsup = con_lsup, con_llev = con_llev, con_ypro = con_ypro, 
-#               con_ysup = con_ysup, con_ylev = con_ylev, con_G = con_G, con_P = con_P))
-# }
+ # SDA function for country level detail
+ SDA_dec_p <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0,
+                     ypro1, ypro0, ysup1, ysup0, ylev1, ylev0, G1, G0, P1, P0){
+   con_U <- avg((U1 - U0) * (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * P1),
+                (U1 - U0) * (lpro0 * lsup0 * llev0) %*% (ypro0 * ysup0 * ylev0 * G0 * P0))
+   con_lpro <- avg(U0 * ((lpro1 - lpro0) * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * P1),
+                   U1 * ((lpro1 - lpro0) * lsup0 * llev0) %*% (ypro0 * ysup0 * ylev0 * G0 * P0))
+   con_lsup <- avg(U0 * (lpro0 * (lsup1 - lsup0) * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * P1),
+                   U1 * (lpro1 * (lsup1 - lsup0) * llev0) %*% (ypro0 * ysup0 * ylev0 * G0 * P0))
+   con_llev <- avg(U0 * (lpro0 * lsup0 * (llev1 - llev0)) %*% (ypro1 * ysup1 * ylev1 * G1 * P1),
+                   U1 * (lpro1 * lsup1 * (llev1 - llev0)) %*% (ypro0 * ysup0 * ylev0 * G0 * P0))
+   con_ypro <- avg(U0 * (lpro0 * lsup0 * llev0) %*% ((ypro1 - ypro0) * ysup1 * ylev1 * G1 * P1),
+                   U1 * (lpro1 * lsup1 * llev1) %*% ((ypro1 - ypro0) * ysup0 * ylev0 * G0 * P0))
+   con_ysup <- avg(U0 * (lpro0 * lsup0 * llev0) %*% (ypro0 * (ysup1 - ysup0) * ylev1 * G1 * P1),
+                   U1 * (lpro1 * lsup1 * llev1) %*% (ypro1 * (ysup1 - ysup0) * ylev0 * G0 * P0))
+   con_ylev <- avg(U0 * (lpro0 * lsup0 * llev0) %*% (ypro0 * ysup0 * (ylev1 - ylev0) * G1 * P1),
+                   U1 * (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * (ylev1 - ylev0) * G0 * P0))
+   con_G <- avg(U0 * (lpro0 * lsup0 * llev0) %*% (ypro0 * ysup0 * ylev0 * (G1 - G0) * P1),
+                U1 * (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * (G1 - G0) * P0))
+   con_P <- avg(U0 * (lpro0 * lsup0 * llev0) %*% (ypro0 * ysup0 * ylev0 * G0 * (P1- P0)),
+                U1 * (lpro1 * lsup1 * llev1) %*% (ypro1 * ysup1 * ylev1 * G1 * (P1 - P0)))
+   delta_F <- con_U + con_lpro + con_lsup + con_llev + con_ypro + con_ysup +
+     con_ylev + con_G + con_P
+   return(list(delta_F = delta_F, con_U = con_U, con_lpro = con_lpro,
+               con_lsup = con_lsup, con_llev = con_llev, con_ypro = con_ypro,
+               con_ysup = con_ysup, con_ylev = con_ylev, con_G = con_G, con_P = con_P))
+ }
+ 
