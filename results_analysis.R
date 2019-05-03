@@ -8,14 +8,14 @@ rm(list = ls()); gc()
 #
 #---------------------------------------------------
 
-# load("results_tbl.RData")
-# # convert tbl into long format & replace NaN values
-# results_long <- results %>%
-#   gather(contribution, value, con_U:con_P) %>% 
-#   mutate(share = value / delta_F)
-# results_long$share[is.na(results_long$share)] <- 0
+load("results_tbl_hybrid.RData")
+# convert tbl into long format & replace NaN values
+results_long <- results %>%
+  gather(contribution, value, con_U:con_P) %>%
+  mutate(share = value / delta_F)
+results_long$share[is.na(results_long$share)] <- 0
 
-# bring results table into long format (=tidy)
+# long tbl with income classes
 load("results_tbl_inc.RData")
 results_long <- results %>%
   gather(contribution, value, con_U:con_P) %>% 
@@ -31,12 +31,12 @@ results_long$income <- factor(results_long$income, levels = c("High income",
 #---------------------------------------------------------
 
 # save as pdf to import into latex
-pdf("hybrid_country.pdf")
-hybrid_country
+pdf("hybrid_year.pdf")
+hybrid_year
 dev.off()
 
-# country level -> hybrid_country
-hybrid_country <- results_long %>% 
+# country level -> fabio_country
+results_long %>% 
   group_by(country, contribution) %>% 
   filter(ISO %in% c("USA", "CHN", "RUS", "IND", "DEU")) %>% 
   summarize(sum = sum(value)) %>% 
@@ -54,7 +54,7 @@ hybrid_country <- results_long %>%
   
 
 # total contribution per income class -> fabio_inc
-hybrid_inc <- results_long %>% 
+results_long %>% 
   drop_na() %>% 
   group_by(income, contribution) %>% 
   summarize(sum = sum(value)) %>% 
@@ -71,9 +71,26 @@ hybrid_inc <- results_long %>%
     ylab("total contribution in ha") +
     coord_flip()
 
-# country details per year
+# total contributions by year in ha -> fabio_year
 results_long %>% 
-  filter(ISO %in% c("USA", "CHN", "RUS", "IND")) %>% 
+  group_by(year, contribution) %>% 
+  summarize(sum = sum(value)) %>% 
+  ggplot(aes(x = year, y = sum, fill = contribution)) +
+  geom_col() +
+  scale_fill_brewer(palette = "RdYlGn",
+                    name = "Driver",
+                    labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+                                  bquote(Delta ~ P), bquote(Delta ~ u),
+                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+                                  bquote(Delta ~ y^{sup}))) +
+  xlab("") +
+  ylab("total contribution in ha") +
+  theme(axis.text.x = element_text(angle = 45))
+
+# country details per year
+results_long %>%
+  filter(ISO %in% c("USA", "CHN", "RUS", "IND", "DEU")) %>%
   ggplot(aes(year, value, fill = contribution)) +
   geom_col(position = "stack") +
   scale_fill_brewer(palette = "RdYlGn",
@@ -88,14 +105,13 @@ results_long %>%
   facet_wrap(~ country)
 
 # sum_delta_F
-results_long %>% 
-  group_by(country) %>% 
-  summarize(sum_F = sum(delta_F)) %>% 
-  ggplot(aes(country, sum_F)) +
+results_long %>%
+  group_by(year) %>%
+  summarize(sum_F = sum(delta_F)) %>%
+  ggplot(aes(year, sum_F)) +
     geom_col() +
     ylab(bquote(Delta ~ F)) +
-    theme(axis.text.x = element_text(angle = 45)) +
-  coord_flip()
+    theme(axis.text.x = element_text(angle = 45))
 
 # total landuse in ha -> total_landuse
 load("total_Elanduse.RData")
@@ -118,7 +134,7 @@ a1 <- results_long %>%
   mutate(share = sum*100/sum(results$delta_F))
 
 # total_contribution -> fabio_driver
-fabio_driver <- ggplot(a1, aes(contribution, share)) +
+ggplot(a1, aes(contribution, share)) +
   geom_col() +
   ylab("contribution in %") +
   xlab("") +
@@ -126,8 +142,7 @@ fabio_driver <- ggplot(a1, aes(contribution, share)) +
                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
                                  bquote(Delta ~ P), bquote(Delta ~ u),
                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
-                                 bquote(Delta ~ y^{sup}))) +
-  theme(text = element_text(size=15))
+                                 bquote(Delta ~ y^{sup})))
 
 # summary per variable in %
 b2 <- results_long %>% 
@@ -146,7 +161,8 @@ c1 <- results_long %>%
 c2 <- results_long %>% 
   group_by(year, contribution) %>% 
   summarize(mean = mean(value),
-            sd = sd(value)) %>% 
+            sd = sd(value),
+            sum = sum(value)) %>% 
   arrange(desc(mean))
 
 c3 <- results_long %>% 
