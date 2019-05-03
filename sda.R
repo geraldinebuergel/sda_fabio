@@ -11,14 +11,14 @@ avg <- function(x, y){(0.5 * x) + (0.5 * y)}
 #
 #---------------------------------
 
-rm(loop01)
-llev[[1]] <- NULL
-lpro[[1]] <- NULL
-lsup[[1]] <- NULL
-gc()
-a <- 3
-b <- 26:28
-source("L_helper.R")
+# rm(loop01)
+# llev[[1]] <- NULL
+# lpro[[1]] <- NULL
+# lsup[[1]] <- NULL
+# gc()
+# a <- 3
+b <- c(1,28)
+# source("L_helper.R")
 load("U_list_p.RData")
 U_list <- U_list[b]
 load("ypro_list_p.RData")
@@ -33,9 +33,9 @@ load("P_list_p.RData")
 P <- P[b]
 
 # loop SDA with decomposed variables
-loop14 <- list()
+loop15 <- list()
 for (i in 2:3){
-  loop14[[i]] <- SDA_dec_p(U_list[[i]], U_list[[(i-1)]],
+  loop15[[i]] <- SDA_dec_p(U_list[[i]], U_list[[(i-1)]],
                         lpro[[i]], lpro[[(i-1)]],
                         lsup[[i]], lsup[[(i-1)]],
                         llev[[i]], llev[[(i-1)]],
@@ -45,7 +45,7 @@ for (i in 2:3){
                         G[[i]], G[[(i-1)]],
                         P[[i]], P[[(i-1)]])
 }
-save(loop14, file = "loop14_p.RData")
+save(loop15, file = "loop15_p.RData")
 
 # SDA function with decomposed inputs
 SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0, 

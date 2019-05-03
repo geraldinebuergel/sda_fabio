@@ -41,7 +41,7 @@ save(U_list, file = "U_list_p.RData")
 L_list <- list.files(path = fabio, pattern = "*_L_mass.rds")
 
 # subset L for 3 years at a time
-L_list <- L_list[26:28] %>% 
+L_list <- L_list[c(1,28)] %>% 
   map(~ readRDS(paste0(fabio,.x))) %>%
   lapply(as.data.frame) %>% 
   map(~.x[1:norow, 1:norow]) %>% 
