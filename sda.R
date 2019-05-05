@@ -17,19 +17,21 @@ avg <- function(x, y){(0.5 * x) + (0.5 * y)}
 # lsup[[1]] <- NULL
 # gc()
 # a <- 3
-b <- c(1,28)
+b <- 26:28
 # source("L_helper.R")
-load("U_list_p.RData")
+load("U_list.RData")
 U_list <- U_list[b]
+load("Y_list.RData")
+Y_list <- Y_list[b]
 load("ypro_list_p.RData")
 ypro <- ypro[b]
 load("ysup_list_p.RData")
 ysup <- ysup[b]
 load("ylev_list_p.RData")
 ylev <- ylev[b]
-load("G_list_p.RData")
+load("G_list.RData")
 G <- G[b]
-load("P_list_p.RData")
+load("P_list.RData")
 P <- P[b]
 
 # loop SDA with decomposed variables
@@ -78,61 +80,106 @@ SDA_dec <- function(U1, U0, lpro1, lpro0, lsup1, lsup0, llev1, llev0,
 #---------------------------------------------------------------
 # TESTS
 #---------------------------------------------------------------
-# load("U_list_hybrid.RData")
-# load("L_list_hybrid.RData")
-# load("Y_list_hybrid.RData")
-# 
-# # reference for what delta F should be
-# F_1995 <- U_list[[1]] %*% L_list[[1]] %*% Y_list[[1]]
-# F_1996 <- U_list[[2]] %*% L_list[[2]] %*% Y_list[[2]]
-# F_1997 <- U_list[[3]] %*% L_list[[3]] %*% Y_list[[3]]
-# F_soll6 <- sum(F_1996) - sum(F_1995)
-# F_soll7 <- sum(F_1997) - sum(F_1996)
-# F_soll <- list(F_soll6, F_soll7)
-# names(F_soll) <- c(1996, 1997)
-# save(F_soll, file = "F_soll_hybrid.RData")
-# 
-# F_2011 <- U_list[[26]] %*% L_list[[1]] %*% Y_list[[26]]
-# F_2012 <- U_list[[27]] %*% L_list[[2]] %*% Y_list[[27]]
-# F_2013 <- U_list[[28]] %*% L_list[[3]] %*% Y_list[[28]]
-# F_soll3 <- sum(F_2013) - sum(F_2012)
-# F_soll2 <- sum(F_2012) - sum(F_2011)
-# F_soll[[3]] <- F_soll2
-# F_soll[[4]] <- F_soll3
-# 
-# #load("F_soll.RData")
-# 
-# # average function
-# avg <- function(x, y){(0.5 * x) + (0.5 * y)}
-# 
-# # test function takes average of both polar decomposition forms and returns individual
-# # contribution to the change of F for each variable as a list
-# SDAt <- function(U1, U0, L1, L0, Y1, Y0){
-#   con_U <- avg(((U1 - U0) %*% L1 %*% Y1), 
-#                ((U1 - U0) %*% L0 %*% Y0))
-#   con_L <- avg((U0 %*% (L1 - L0) %*% Y1),   
-#                (U1 %*% (L1 - L0) %*% Y0))
-#   con_Y <- avg((U0 %*% L0 %*% (Y1 - Y0)),   
-#                (U1 %*% L1 %*% (Y1 - Y0)))
-#   delta_F <- con_U + con_L + con_Y
-#   return(list(delta_F = delta_F, con_U = con_U, con_L = con_L, con_Y = con_Y))
-# }
-# 
-# # check test function -> it works!
-# delta_Ft <- SDAt(U_list[[3]], U_list[[2]], 
-#                  L_list[[3]], L_list[[2]], 
-#                  Y_list[[3]], Y_list[[2]])
-# 
-# all.equal(F_soll[[2]], sum(delta_Ft[["delta_F"]]))
-# 
-# # test loop for SDA function with list inputs
-# loopt <- list()
-# for (i in 2:3){
-#   loopt[[i]] <- SDAt(U_list[[i]], U_list[[(i-1)]], 
-#                      L_list[[i]], L_list[[(i-1)]],
-#                      Y_list[[i]], Y_list[[(i-1)]])
-# }
-# all.equal(F_soll[[2]], sum(loopt[[3]][["delta_F"]]))
+
+# test with 3 variables
+load("U_list.RData")
+load("L_list.RData")
+load("Y_list.RData")
+
+# reference for what delta F should be
+F_2011 <- U_list[[1]] %*% L_list[[1]] %*% Y_list[[1]]
+F_2012 <- U_list[[2]] %*% L_list[[2]] %*% Y_list[[2]]
+F_2013 <- U_list[[3]] %*% L_list[[3]] %*% Y_list[[3]]
+F_soll2 <- sum(F_2012) - sum(F_2011)
+F_soll3 <- sum(F_2013) - sum(F_2012)
+F_soll <- list(F_soll2, F_soll3)
+
+# test function takes average of both polar decomposition forms and returns individual
+# contribution to the change of F for each variable as a list
+avg <- function(x, y){(0.5 * x) + (0.5 * y)}
+
+SDAt <- function(U1, U0, L1, L0, Y1, Y0){
+  con_U <- avg(((U1 - U0) %*% L1 %*% Y1),
+               ((U1 - U0) %*% L0 %*% Y0))
+  con_L <- avg((U0 %*% (L1 - L0) %*% Y1),
+               (U1 %*% (L1 - L0) %*% Y0))
+  con_Y <- avg((U0 %*% L0 %*% (Y1 - Y0)),
+               (U1 %*% L1 %*% (Y1 - Y0)))
+  delta_F <- con_U + con_L + con_Y
+  return(list(delta_F = delta_F, con_U = con_U, con_L = con_L, con_Y = con_Y))
+}
+
+# test loop for SDA function with list inputs
+loopt <- list()
+for (i in 2:3){
+  loopt[[i]] <- SDAt(U_list[[i]], U_list[[(i-1)]],
+                     L_list[[i]], L_list[[(i-1)]],
+                     Y_list[[i]], Y_list[[(i-1)]])
+}
+all.equal(F_soll[[2]], sum(loopt[[3]][["delta_F"]])) # -> TRUE
+
+save(loopt, file = "loop_uLY.RData")
+
+# test with 4 variables
+
+Y_list <- map2(Y_list, P, ~.x / .y) %>% 
+  rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
+
+SDAt <- function(U1, U0, L1, L0, Y1, Y0, P1, P0){
+  con_U <- avg(((U1 - U0) %*% L1 %*% (Y1 * P1)),
+               ((U1 - U0) %*% L0 %*% (Y0 * P0)))
+  con_L <- avg((U0 %*% (L1 - L0) %*% (Y1 * P1)),
+               (U1 %*% (L1 - L0) %*% (Y0 * P0)))
+  con_Y <- avg((U0 %*% L0 %*% ((Y1 - Y0) * P1)),
+               (U1 %*% L1 %*% ((Y1 - Y0) * P0)))
+  con_P <- avg((U0 %*% L0 %*% (Y0 * (P1 - P0))),
+               (U1 %*% L1 %*% (Y1 * (P1 - P0))))
+  delta_F <- con_U + con_L + con_Y + con_P
+  return(list(delta_F = delta_F, con_U = con_U, con_L = con_L, con_Y = con_Y, con_P = con_P))
+}
+
+loopt <- list()
+for (i in 2:3){
+  loopt[[i]] <- SDAt(U_list[[i]], U_list[[(i-1)]],
+                     L_list[[i]], L_list[[(i-1)]],
+                     Y_list[[i]], Y_list[[(i-1)]],
+                     P[[i]], P[[(i-1)]])
+}
+all.equal(F_soll[[2]], sum(loopt[[3]][["delta_F"]])) # -> "Mean relative difference: 7.830697e-05" -> is ok
+
+save(loopt, file = "loop_uLYP.RData")
+
+# test with 5 variables
+
+Y_list <- map2(Y_list, gdp, ~.x / .y) %>% 
+  rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
+
+SDAt <- function(U1, U0, L1, L0, Y1, Y0, G1, G0, P1, P0){
+  con_U <- avg(((U1 - U0) %*% L1 %*% (Y1 * G1 * P1)),
+               ((U1 - U0) %*% L0 %*% (Y0 * G0 * P0)))
+  con_L <- avg((U0 %*% (L1 - L0) %*% (Y1 * G1 * P1)),
+               (U1 %*% (L1 - L0) %*% (Y0 * G0 * P0)))
+  con_Y <- avg((U0 %*% L0 %*% ((Y1 - Y0) * G1 * P1)),
+               (U1 %*% L1 %*% ((Y1 - Y0) * G0 * P0)))
+  con_G <- avg((U0 %*% L0 %*% (Y0 * (G1 - G0) * P1)),
+               (U1 %*% L1 %*% (Y1 * (G1 - G0) * P0)))
+  con_P <- avg((U0 %*% L0 %*% (Y0 * G0 * (P1 - P0))),
+               (U1 %*% L1 %*% (Y1 * G1 * (P1 - P0))))
+  delta_F <- con_U + con_L + con_Y + con_G + con_P
+  return(list(delta_F = delta_F, con_U = con_U, con_L = con_L, con_Y = con_Y, con_G = con_G, con_P = con_P))
+}
+
+loopt <- list()
+for (i in 2:3){
+  loopt[[i]] <- SDAt(U_list[[i]], U_list[[(i-1)]],
+                     L_list[[i]], L_list[[(i-1)]],
+                     Y_list[[i]], Y_list[[(i-1)]],
+                     G[[i]], G[[(i-1)]],
+                     P[[i]], P[[(i-1)]])
+}
+all.equal(F_soll[[2]], sum(loopt[[3]][["delta_F"]])) # -> "Mean relative difference: 7.830697e-05" -> same as before
+
+save(loopt, file = "loop_uLYGP.RData")
 
 #-------------------------------------------------------------
 # PRODUCT LEVEL

@@ -13,7 +13,9 @@ mount_wu_share()
 fabio <- "/mnt/nfs_fineprint/tmp/fabio/"
 
 # number of desired rows depending on number of products
-norow <- 24700
+nocol <- 190
+nopro <- 130
+norow <- nocol * nopro
 
 # load E files and subset landuse columns
 E_list <-  list.files(path = fabio, pattern = "*_E.rds") %>% 
@@ -35,20 +37,20 @@ U_list <- map2(E_landuse, X_list, ~.x / .y) %>%
   map(~.x[1:norow])
 
 # save U 
-save(U_list, file = "U_list_p.RData")
+save(U_list, file = "U_list.RData")
 
 # load L files
-L_list <- list.files(path = fabio, pattern = "*_L_mass.rds")
+L_list <- list.files(path = fabio, pattern = "*_L_price.rds")
 
 # subset L for 3 years at a time
-L_list <- L_list[c(1,28)] %>% 
+L_list <- L_list[26:28] %>% 
   map(~ readRDS(paste0(fabio,.x))) %>%
   lapply(as.data.frame) %>% 
   map(~.x[1:norow, 1:norow]) %>% 
   lapply(as.matrix)
 
 # save L
-save(L_list, file = "L_list_p.RData")
+save(L_list, file = "L_list.RData")
 
 # load Y files and subset food columns
 Y_list <-  list.files(path = fabio, pattern = "*_Y.rds") %>% 
@@ -56,7 +58,7 @@ Y_list <-  list.files(path = fabio, pattern = "*_Y.rds") %>%
   lapply(as.data.frame) %>% 
   lapply(dplyr::select, contains("Food")) %>% 
   lapply(as.matrix) %>% 
-  map(~.x[1:norow, 1:190])
+  map(~.x[1:norow, 1:nocol])
   
 # save Y
-save(Y_list, file = "Y_list_p.RData")
+save(Y_list, file = "Y_list.RData")
