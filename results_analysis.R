@@ -8,10 +8,10 @@ rm(list = ls()); gc()
 #
 #---------------------------------------------------
 
-load("results_tbl_hybrid.RData")
+load("results_tbl.RData")
 # convert tbl into long format & replace NaN values
 results_long <- results %>%
-  gather(contribution, value, con_U:con_P) %>%
+  gather(contribution, value, con_U:ncol(results)) %>%
   mutate(share = value / delta_F)
 results_long$share[is.na(results_long$share)] <- 0
 
@@ -71,19 +71,21 @@ results_long %>%
     ylab("total contribution in ha") +
     coord_flip()
 
-# total contributions by year in ha -> fabio_year
+# total contributions by year in ha -> fabio_year year_uLY
 results_long %>% 
+  filter(year %in% c(2012, 2013)) %>%
+  filter(contribution %in% c("con_U", "con_G", "con_P")) %>%
   group_by(year, contribution) %>% 
   summarize(sum = sum(value)) %>% 
   ggplot(aes(x = year, y = sum, fill = contribution)) +
   geom_col() +
-  scale_fill_brewer(palette = "RdYlGn",
-                    name = "Driver",
-                    labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
-                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
-                                  bquote(Delta ~ P), bquote(Delta ~ u),
-                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
-                                  bquote(Delta ~ y^{sup}))) +
+  # scale_fill_brewer(palette = "RdYlGn",
+  #                   name = "Driver",
+  #                   labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+  #                                 bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+  #                                 bquote(Delta ~ P), bquote(Delta ~ u),
+  #                                 bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+  #                                 bquote(Delta ~ y^{sup}))) +
   xlab("") +
   ylab("total contribution in ha") +
   theme(axis.text.x = element_text(angle = 45))

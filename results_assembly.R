@@ -6,8 +6,8 @@ rm(list = ls()); gc()
 # assemble results in list
 #-----------------------------------
 
-load("loop_c.RData")
-results <- loop_c[2:28]
+results <- loopt
+results[[1]] <- NULL
 
 loop_list <- list.files(pattern = "loop") %>% 
   map(~ mget(load(paste0(.x))))
@@ -22,7 +22,7 @@ results[[14]] <- loop_list[[14]][[1]][[2]]
 results <- unlist(results, recursive = FALSE)
 results <- split(results, rep(1:27, each = 10))
 
-names(results) <- c(1996:2013)
+names(results) <- c(2012:2013)
 #names(results[[27]]) <- c("delta_F", "con_U", "con_lpro", "con_lsup", "con_llev",
                           #"con_ypro", "con_ysup", "con_ylev", "con_G", "con_P")
 save(results, file = "results_list_hybrid.RData")
@@ -61,10 +61,7 @@ ISO <- c("AUT", "BEL", "BGR", "CYP", "CZE", "DEU", "DNK", "EST", "ESP",
                 "RUS", "AUS", "CHE", "TUR", "TWN", "NOR", "IDN", "ZAF")
 save(ISO, file = "hybrid_ISO.RData")
 
-ISO <- c("CHN", "DEU", "RUS", "USA")
-save(ISO, file = "ISO_c.RData")
-
-#country codes ----------------------------------------
+#country names ----------------------------------------
 country <- c("Armenia","Afghanistan","Albania","Algeria","Angola","Antigua and Barbuda",
              "Argentina","Australia","Austria","Bahamas","Bahrain","Barbados","Belgium-Luxembourg",
              "Bangladesh","Bolivia (Plurinational State of)","Botswana","Brazil","Belize",
@@ -111,9 +108,6 @@ country <- c("Austria"                   ,"Belgium"    ,"Bulgaria"        ,"Cypr
                     )
 save(country, file = "hybrid_country.RData")
 
-country <- c("China, mainland", "Germany", "Russian Federation", "United States of America")
-save(country, file = "country_c.RData")
-
 # assemble tibble--------------------------
 
 # function isolates variables and converts them into a vector
@@ -124,22 +118,29 @@ vec_list <- function(x){
     as.vector()
 }
 
+vec_list <- function(x){
+  map(results, x) %>% 
+    unlist()
+}
+
 # makes tibble from ISO, country, results (with year names)
 results <- tibble(country = as.factor(rep(country, each = length(results))),
                       ISO = as.factor(rep(ISO, each = length(results))),
                       year = as.factor(rep(names(results), times = length(results[[1]][[1]]))),
                       delta_F = vec_list("delta_F"),
                       con_U = vec_list("con_U"),
-                      con_lpro = vec_list("con_lpro"),
-                      con_lsup = vec_list("con_lsup"),
-                      con_llev = vec_list("con_llev"),
-                      con_ypro = vec_list("con_ypro"),
-                      con_ysup = vec_list("con_ysup"),
-                      con_ylev = vec_list("con_ylev"),
+                      con_L = vec_list("con_L"),
+                      con_Y = vec_list("con_Y"),
+                      # con_lpro = vec_list("con_lpro"),
+                      # con_lsup = vec_list("con_lsup"),
+                      # con_llev = vec_list("con_llev"),
+                      # con_ypro = vec_list("con_ypro"),
+                      # con_ysup = vec_list("con_ysup"),
+                      # con_ylev = vec_list("con_ylev"),
                       con_G = vec_list("con_G"),
                       con_P = vec_list("con_P")
 )
-save(results, file = "results_tbl_hybrid.RData")
+save(results, file = "results_tbl_uLYGP.RData")
 
 class <- read_xlsx("C:/Users/Zoe/Dropbox/Master Arbeit/excel/income_class.xlsx")
 
