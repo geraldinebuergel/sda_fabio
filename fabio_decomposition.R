@@ -25,26 +25,26 @@ ljrs <- lapply(L_list, as.data.frame) %>%
   map(~ matrix(unlist(.x), nrow = nocol, ncol = norow, byrow = TRUE)) %>% 
   map(~ .x[rep(1:nrow(.x), each = nopro), ])
 
-save(ljrs, file = "ljrs_p.RData")
+save(ljrs, file = "ljrs.RData")
 
 # distribution of intermediate products (Lijrs/Ljrs)
 lpro <- map2(L_list, ljrs, ~.x / .y) %>% 
   rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
 
-save(lpro, file = "lpro_list_p.RData")
+save(lpro, file = "lpro_list.RData")
 
 # level of total input requirements (Ljs)
 llev <- lapply(L_list, colSums) %>% 
   lapply(matrix, nrow = norow, ncol = norow, byrow = TRUE)
 
-save(llev, file = "llev_list_p.RData")
+save(llev, file = "llev_list.RData")
 
 rm(L_list); gc()
 
 lsup <- map2(ljrs, llev, ~.x / .y) %>% 
   rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
 
-save(lsup, file = "lsup_list_p.RData")
+save(lsup, file = "lsup_list.RData")
 
 rm(ljrs); gc()
 
@@ -75,17 +75,7 @@ ypro <- map2(Y_list, yrs, ~.x / .y) %>%
 
 save(ypro, file = "ypro_list.RData")
 
-load("GDP.RData")
 load("Population.RData")
-
-gdp <- map(gdp, ~.x[rep(1:nocol, each = nopro)]) %>%
-  map(~ matrix(.x, nrow = length(.x), ncol = nocol))
-
-# level of final demand per capita (Ys/GDP)
-ylev <- map2(ys, gdp, ~.x / .y) %>% 
-  rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
-
-save(ylev, file = "ylev_list.RData")
 
 # Population (P)
 P <- map(pop, ~.x[rep(1:nocol, each = nopro)]) %>% 
@@ -93,12 +83,12 @@ P <- map(pop, ~.x[rep(1:nocol, each = nopro)]) %>%
 
 save(P, file = "P_list.RData")
 
-# GDP per capita (G)
-G <- map2(gdp, P, ~.x / .y) %>%
+# level of final demand per capita (Ys/GDP)
+ylev <- map2(ys, P, ~.x / .y) %>% 
   rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
 
-save(G, file = "G_list.RData")
+save(ylev, file = "ylev_list.RData")
 
-Y_dec <- pmap(list(ypro, ysup, ylev, G, P), ~..1 * ..2 * ..3 * ..4 * ..5) %>% 
+Y_dec <- pmap(list(ypro, ysup, ylev, P), ~..1 * ..2 * ..3 * ..4) %>% 
   rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
 all.equal(Y_list, Y_dec)
