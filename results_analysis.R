@@ -78,13 +78,13 @@ results_long %>%
   summarize(sum = sum(value)) %>% 
   ggplot(aes(x = year, y = sum, fill = contribution)) +
   geom_col() +
-  # scale_fill_brewer(palette = "RdYlGn",
-  #                   name = "Driver",
-  #                   labels = list(bquote(Delta ~ l^{lev}),
-  #                                 bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
-  #                                 bquote(Delta ~ P), bquote(Delta ~ u),
-  #                                 bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
-  #                                 bquote(Delta ~ y^{sup}))) +
+  scale_fill_brewer(palette = "RdYlGn",
+                    name = "Driver",
+                    labels = list(bquote(Delta ~ l^{lev}),
+                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+                                  bquote(Delta ~ P), bquote(Delta ~ u),
+                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+                                  bquote(Delta ~ y^{sup}))) +
   xlab("") +
   ylab("total contribution in ha") +
   theme(axis.text.x = element_text(angle = 45))
@@ -117,7 +117,7 @@ results_long %>%
 # total landuse in ha -> total_landuse
 load("total_Elanduse.RData")
 qplot(year, landuse, data = t, geom = "line", ylab = "landuse in ha")
-total_landuse <- ggplot(t, aes(year, landuse)) +
+ggplot(t, aes(year, landuse)) +
   geom_line() +
   ylab("landuse in ha") +
   theme(text = element_text(size=15))
@@ -138,12 +138,12 @@ a1 <- results_long %>%
 ggplot(a1, aes(contribution, share)) +
   geom_col() +
   ylab("contribution in %") +
-  xlab("") +
-  scale_x_discrete(labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
-                                 bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
-                                 bquote(Delta ~ P), bquote(Delta ~ u),
-                                 bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
-                                 bquote(Delta ~ y^{sup})))
+  xlab("") #+
+  # scale_x_discrete(labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+  #                                bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+  #                                bquote(Delta ~ P), bquote(Delta ~ u),
+  #                                bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+  #                                bquote(Delta ~ y^{sup})))
 
 # summary per variable in %
 b2 <- results_long %>% 

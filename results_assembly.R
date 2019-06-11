@@ -19,15 +19,7 @@ for(i in 1:length(loop_list)){
   results[[i]] <- loop_list[[i]][[1]]
 }
 
-# results <- lapply(results, unlist, recursive = FALSE)
-# results[[14]] <- loop_list[[14]][[1]][[2]]
-# results <- unlist(results, recursive = FALSE)
-# results <- split(results, rep(1:27, each = 10))
-
 names(results) <- c(1987:2013)
-# names(results[[27]]) <- c("delta_F", "con_U", "con_lpro", "con_lsup", "con_llev",
-#                           "con_ypro", "con_ysup", "con_ylev", "con_G", "con_P")
-# save(results, file = "results_list_hybrid.RData")
 
 #----------------------------------------
 # turn list into appropriate tibble
@@ -112,17 +104,13 @@ save(country, file = "hybrid_country.RData")
 
 # assemble tibble--------------------------
 
-# function isolates variables and converts them into a vector
+# function isolates variables per country and converts them into a vector
+# (function converts whole list into a matrix and each column into a vector)
 vec_list <- function(x){
   map(results, x) %>% 
     unlist() %>%
     matrix(nrow = length(results), ncol = length(results[[1]][[1]]), byrow = TRUE) %>% 
     as.vector()
-}
-
-vec_list <- function(x){
-  map(results, x) %>% 
-    unlist()
 }
 
 load("ISO_fabio.RData")
@@ -134,17 +122,17 @@ results <- tibble(country = as.factor(rep(country, each = length(results))),
                       year = as.factor(rep(names(results), times = length(results[[1]][[1]]))),
                       delta_F = vec_list("delta_F"),
                       con_U = vec_list("con_U"),
-                      con_L = vec_list("con_L"),
-                      con_Y = vec_list("con_Y"),
-                      # con_lpro = vec_list("con_lpro"),
-                      # con_lsup = vec_list("con_lsup"),
-                      # con_llev = vec_list("con_llev"),
-                      # con_ypro = vec_list("con_ypro"),
-                      # con_ysup = vec_list("con_ysup"),
-                      # con_ylev = vec_list("con_ylev"),
+                      # con_L = vec_list("con_L"),
+                      # con_Y = vec_list("con_Y"),
+                      con_lpro = vec_list("con_lpro"),
+                      con_lsup = vec_list("con_lsup"),
+                      con_llev = vec_list("con_llev"),
+                      con_ypro = vec_list("con_ypro"),
+                      con_ysup = vec_list("con_ysup"),
+                      con_ylev = vec_list("con_ylev"),
                       con_P = vec_list("con_P")
 )
-save(results, file = "results_tbl_uLYP.RData")
+save(results, file = "results_tbl_n.RData")
 
 class <- read_xlsx("C:/Users/Zoe/Dropbox/Master Arbeit/excel/income_class.xlsx")
 
