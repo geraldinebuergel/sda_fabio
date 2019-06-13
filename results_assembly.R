@@ -122,17 +122,18 @@ results <- tibble(country = as.factor(rep(country, each = length(results))),
                       year = as.factor(rep(names(results), times = length(results[[1]][[1]]))),
                       delta_F = vec_list("delta_F"),
                       con_U = vec_list("con_U"),
-                      # con_L = vec_list("con_L"),
-                      # con_Y = vec_list("con_Y"),
-                      con_lpro = vec_list("con_lpro"),
-                      con_lsup = vec_list("con_lsup"),
-                      con_llev = vec_list("con_llev"),
-                      con_ypro = vec_list("con_ypro"),
-                      con_ysup = vec_list("con_ysup"),
-                      con_ylev = vec_list("con_ylev"),
+                      con_L = vec_list("con_L"),
+                      con_Y = vec_list("con_Y"),
+                      con_G = vec_list("con_G"),
+                      # con_lpro = vec_list("con_lpro"),
+                      # con_lsup = vec_list("con_lsup"),
+                      # con_llev = vec_list("con_llev"),
+                      # con_ypro = vec_list("con_ypro"),
+                      # con_ysup = vec_list("con_ysup"),
+                      # con_ylev = vec_list("con_ylev"),
                       con_P = vec_list("con_P")
 )
-save(results, file = "results_tbl_n.RData")
+save(results, file = "results_tbl_uLYGP.RData")
 
 class <- read_xlsx("C:/Users/Zoe/Dropbox/Master Arbeit/excel/income_class.xlsx")
 

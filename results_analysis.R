@@ -74,17 +74,17 @@ results_long %>%
 # total contributions by year in ha -> fabio_year
 results_long %>%
   group_by(year, contribution) %>% 
-  filter(year %in% c(2012:2013)) %>% 
+  #filter(year %in% c(1987:2001)) %>% 
   summarize(sum = sum(value)) %>% 
   ggplot(aes(x = year, y = sum, fill = contribution)) +
   geom_col() +
-  scale_fill_brewer(palette = "RdYlGn",
-                    name = "Driver",
-                    labels = list(bquote(Delta ~ l^{lev}),
-                                  bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
-                                  bquote(Delta ~ P), bquote(Delta ~ u),
-                                  bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
-                                  bquote(Delta ~ y^{sup}))) +
+  # scale_fill_brewer(palette = "RdYlGn",
+  #                   name = "Driver",
+  #                   labels = list(bquote(Delta ~ l^{lev}),
+  #                                 bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+  #                                 bquote(Delta ~ P), bquote(Delta ~ u),
+  #                                 bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+  #                                 bquote(Delta ~ y^{sup}))) +
   xlab("") +
   ylab("total contribution in ha") +
   theme(axis.text.x = element_text(angle = 45))
