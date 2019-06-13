@@ -8,7 +8,7 @@ rm(list = ls()); gc()
 #
 #---------------------------------------------------
 
-load("results_tbl.RData")
+load("results_tbl_n.RData")
 # convert tbl into long format & replace NaN values
 results_long <- results %>%
   gather(contribution, value, con_U:ncol(results)) %>%
@@ -45,7 +45,7 @@ results_long %>%
   coord_flip() +
   scale_fill_brewer(palette = "RdYlGn",
                     name = "Driver",
-                    labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+                    labels = list(bquote(Delta ~ l^{lev}),
                                   bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
                                   bquote(Delta ~ P), bquote(Delta ~ u),
                                   bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
@@ -71,17 +71,16 @@ results_long %>%
     ylab("total contribution in ha") +
     coord_flip()
 
-# total contributions by year in ha -> fabio_year year_uLY
-results_long %>% 
-  filter(year %in% c(2012, 2013)) %>%
-  filter(contribution %in% c("con_U", "con_G", "con_P")) %>%
+# total contributions by year in ha -> fabio_year
+results_long %>%
   group_by(year, contribution) %>% 
+  #filter(year %in% c(1987:2001)) %>% 
   summarize(sum = sum(value)) %>% 
   ggplot(aes(x = year, y = sum, fill = contribution)) +
   geom_col() +
   # scale_fill_brewer(palette = "RdYlGn",
   #                   name = "Driver",
-  #                   labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+  #                   labels = list(bquote(Delta ~ l^{lev}),
   #                                 bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
   #                                 bquote(Delta ~ P), bquote(Delta ~ u),
   #                                 bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
@@ -97,7 +96,7 @@ results_long %>%
   geom_col(position = "stack") +
   scale_fill_brewer(palette = "RdYlGn",
                     name = "Variable",
-                    labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+                    labels = list(bquote(Delta ~ l^{lev}),
                                   bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
                                   bquote(Delta ~ P), bquote(Delta ~ u),
                                   bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
@@ -118,7 +117,7 @@ results_long %>%
 # total landuse in ha -> total_landuse
 load("total_Elanduse.RData")
 qplot(year, landuse, data = t, geom = "line", ylab = "landuse in ha")
-total_landuse <- ggplot(t, aes(year, landuse)) +
+ggplot(t, aes(year, landuse)) +
   geom_line() +
   ylab("landuse in ha") +
   theme(text = element_text(size=15))
@@ -139,12 +138,12 @@ a1 <- results_long %>%
 ggplot(a1, aes(contribution, share)) +
   geom_col() +
   ylab("contribution in %") +
-  xlab("") +
-  scale_x_discrete(labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
-                                 bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
-                                 bquote(Delta ~ P), bquote(Delta ~ u),
-                                 bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
-                                 bquote(Delta ~ y^{sup})))
+  xlab("") #+
+  # scale_x_discrete(labels = list(bquote(Delta ~ G), bquote(Delta ~ l^{lev}),
+  #                                bquote(Delta ~ l^{pro}), bquote(Delta ~ l^{sup}),
+  #                                bquote(Delta ~ P), bquote(Delta ~ u),
+  #                                bquote(Delta ~ y^{lev}), bquote(Delta ~ y^{pro}),
+  #                                bquote(Delta ~ y^{sup})))
 
 # summary per variable in %
 b2 <- results_long %>% 
