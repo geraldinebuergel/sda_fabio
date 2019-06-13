@@ -76,12 +76,18 @@ ypro <- map2(Y_list, yrs, ~.x / .y) %>%
 save(ypro, file = "ypro_list.RData")
 
 load("Population.RData")
+load("GDP.RData")
 
 # Population (P)
 P <- map(pop, ~.x[rep(1:nocol, each = nopro)]) %>% 
   map(~ matrix(.x, nrow = length(.x), ncol = nocol))
 
 save(P, file = "P_list.RData")
+
+GDP <- map(gdp, ~.x[rep(1:nocol, each = nopro)]) %>% 
+  map(~ matrix(.x, nrow = length(.x), ncol = nocol))
+
+save(GDP, file = "GDP_list.RData")
 
 # level of final demand per capita (Ys/GDP)
 ylev <- map2(ys, P, ~.x / .y) %>% 

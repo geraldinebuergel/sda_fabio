@@ -90,9 +90,11 @@ load("Y_list.RData")
 F_2011 <- U_list[[1]] %*% L_list[[1]] %*% Y_list[[1]]
 F_2012 <- U_list[[2]] %*% L_list[[2]] %*% Y_list[[2]]
 F_2013 <- U_list[[3]] %*% L_list[[3]] %*% Y_list[[3]]
-F_soll2 <- sum(F_2012) - sum(F_2011)
-F_soll3 <- sum(F_2013) - sum(F_2012)
+F_soll2 <- F_2012 - F_2011
+F_soll3 <- F_2013 - F_2012
 F_soll <- list(F_soll2, F_soll3)
+names(F_soll) <- c(2012, 2013)
+save(F_soll, file = "F_soll.RData")
 
 #------------------------------------------------------------
 # test with 3 variables -> f=uLY
@@ -142,7 +144,7 @@ fabio_sda <- function(i){
   save(loop, file = paste0("loop_", i-1,".RData"))
 }
 
-for (i in 2:28){
+for (i in 27:28){
   
   fabio_sda(i = i)
   
@@ -213,12 +215,21 @@ for (i in 2:28){
   
 }
 
-# test with 5 variables
+#--------------------------------------------------------------
+# test with 5 variables -> f=uLYGP
+#--------------------------------------------------------------
 
-Y_list <- map2(Y_list, gdp, ~.x / .y) %>% 
+Y_list <- map2(Y_list, GDP, ~.x / .y) %>% 
   rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
 
-SDAt <- function(U1, U0, L1, L0, Y1, Y0, G1, G0, P1, P0){
+save(Y_list, file = "Y_list_uLYGP.RData")
+
+G <- map2(GDP, P, ~.x / .y) %>% 
+  rapply(function(x) ifelse(!is.finite(x), 0, x), how = "list")
+
+save(G, file = "G_list_uLYGP.RData")
+
+SDA_GP <- function(U1, U0, L1, L0, Y1, Y0, G1, G0, P1, P0){
   con_U <- avg(((U1 - U0) %*% L1 %*% (Y1 * G1 * P1)),
                ((U1 - U0) %*% L0 %*% (Y0 * G0 * P0)))
   con_L <- avg((U0 %*% (L1 - L0) %*% (Y1 * G1 * P1)),
@@ -231,6 +242,51 @@ SDAt <- function(U1, U0, L1, L0, Y1, Y0, G1, G0, P1, P0){
                (U1 %*% L1 %*% (Y1 * G1 * (P1 - P0))))
   delta_F <- con_U + con_L + con_Y + con_G + con_P
   return(list(delta_F = delta_F, con_U = con_U, con_L = con_L, con_Y = con_Y, con_G = con_G, con_P = con_P))
+}
+
+fabio <- "/mnt/nfs_fineprint/tmp/fabio/"
+
+nocol <- 190
+nopro <- 130
+norow <- nocol * nopro
+
+avg <- function(x, y){(0.5 * x) + (0.5 * y)}
+
+fabio_sda <- function(i){
+  
+  print(i-1)
+  
+  b <- c(i-1, i)
+  
+  L_list <- list.files(path = fabio, pattern = "*_L_price.rds")
+  L_list <- L_list[b] %>% 
+    map(~ readRDS(paste0(fabio,.x))) %>%
+    lapply(as.data.frame) %>% 
+    map(~.x[1:norow, 1:norow]) %>% 
+    lapply(as.matrix)
+  
+  load("U_list.RData")
+  U_list <- U_list[b]
+  load("Y_list_GP.RData")
+  Y_list <- Y_list[b]
+  load("G_list_GP.RData")
+  G <- G[b]
+  load("P_list.RData")
+  P <- P[b]
+  
+  loop_GP <- SDA_GP(U_list[[2]], U_list[[1]],
+                    L_list[[2]], L_list[[1]],
+                    Y_list[[2]], Y_list[[1]],
+                    G[[2]], G[[1]],
+                    P[[2]], P[[1]])
+  
+  save(loop_GP, file = paste0("loop_GP_", i-1,".RData"))
+}
+
+for (i in 2:28){
+  
+  fabio_sda(i = i)
+  
 }
 
 loopt <- list()
